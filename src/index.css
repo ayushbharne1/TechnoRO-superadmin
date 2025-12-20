@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+
+@import "tailwindcss";
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hidden {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;     /* Firefox */
+  }
+
+  body {
+  overflow-y: auto; /* normal scroll only if content exceeds viewport */
+}
+
+
+/* Hide scrollbar but still allow scrolling */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+
+
+/* Hide scrollbar but allow scrolling */
+.hide-scrollbar {
+  overflow: auto;          /* allow scrolling */
+  scrollbar-width: none;   /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;           /* Chrome, Safari, Opera */
+}
+
+
+/* Hide all scrollbars globally */
+html, body {
+  overflow: hidden;  /* hides scrollbars completely */
+  height: 100%;
+  
+
+}
+
+/* Optional: allow scrolling inside a specific container */
+.hide-scrollbar {
+  overflow: auto;          /* scrolling works */
+  scrollbar-width: none;   /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;           /* Chrome, Safari, Opera */
+}
+
+
+

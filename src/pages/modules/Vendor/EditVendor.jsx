@@ -1,0 +1,138 @@
+// src/pages/vendor/EditVendor.jsx - FINAL VERIFIED CODE
+
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import Header2 from "../../../components/superAdmin/header/Header2";
+
+const API_URL = "https://ro-service-engineer-be.onrender.com/api/admin/vendor";
+
+const EditVendor = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "",
+    companyName: "",
+    mobile: "",
+    address: "",
+    email: "",
+    password: "", // Kept for API, but only send if not empty
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("adminToken");
+    if (!token) {
+      navigate("/");
+      return;
+    }
+    const fetchVendorDetails = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get(`${API_URL}/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.data.success) {
+          const { name, companyName, mobile, phone, address, email } = response.data.data;
+          setFormData({ name, companyName, mobile: mobile || phone, address, email, password: "" });
+        }
+      } catch (err) {
+        console.error("Failed to fetch vendor:", err);
+        setError("Could not load vendor data.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchVendorDetails();
+  }, [id, navigate]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("adminToken");
+    setIsLoading(true);
+    setError("");
+
+    // Only send fields required by the update API
+    const payload = {
+        name: formData.name,
+        mobile: formData.mobile,
+        companyName: formData.companyName,
+        address: formData.address,
+        email: formData.email
+    };
+    // Only include the password if the user has typed a new one
+    if (formData.password) {
+        payload.password = formData.password;
+    }
+
+    try {
+      await axios.put(`${API_URL}/${id}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert("Vendor updated successfully!");
+      navigate("/vendors");
+    } catch (err) {
+      console.error("Update failed:", err);
+      setError(err.response?.data?.message || "Update failed.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  if (isLoading && !formData.name) return <div className="p-6 text-center">Loading...</div>
+
+  return (
+    <div className="bg-gray-100 min-h-screen w-full p-4 sm:p-6 flex flex-col">
+      <Header2 />
+      <div className="bg-white p-8 rounded-2xl shadow-md w-full h-full mt-4">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Edit Vendor Details</h2>
+        <hr className="border-gray-300 mb-6" />
+        <form onSubmit={handleUpdate} className="flex flex-col gap-6 w-full">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">Full Name</label>
+              <input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full p-3 border" />
+            </div>
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">Company</label>
+              <input type="text" name="companyName" value={formData.companyName} onChange={handleChange} className="w-full p-3 border" />
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">Phone No.</label>
+              <input type="text" name="mobile" value={formData.mobile} onChange={handleChange} className="w-full p-3 border" />
+            </div>
+             <div>
+              <label className="block mb-1 font-medium text-gray-700">Email</label>
+              <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full p-3 border" />
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">Address</label>
+              <input type="text" name="address" value={formData.address} onChange={handleChange} className="w-full p-3 border" />
+            </div>
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">New Password (optional)</label>
+              <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Leave blank to keep current password" className="w-full p-3 border" />
+            </div>
+          </div>
+          {error && <p className="text-red-500 text-center">{error}</p>}
+          <div className="flex justify-center pt-4">
+            <button type="submit" disabled={isLoading} className="bg-[#7EC1B1] text-white font-medium px-20 py-2 hover:bg-[#65a89d] transition disabled:bg-gray-400">
+              {isLoading ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default EditVendor;
