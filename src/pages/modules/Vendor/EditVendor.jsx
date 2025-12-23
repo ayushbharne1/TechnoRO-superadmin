@@ -2,14 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchVendorById, updateVendor } from "../../../redux/slices/vendorSlice";
 import Header2 from "../../../components/superAdmin/header/Header2";
-
-const API_URL = "https://ro-service-engineer-be.onrender.com/api/admin/vendor";
 
 const EditVendor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { current, loading: isBusy } = useSelector((s) => s.vendor);
   const [formData, setFormData] = useState({
     name: "",
     companyName: "",
@@ -18,7 +19,6 @@ const EditVendor = () => {
     email: "",
     password: "", // Kept for API, but only send if not empty
   });
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -27,25 +27,15 @@ const EditVendor = () => {
       navigate("/");
       return;
     }
-    const fetchVendorDetails = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get(`${API_URL}/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.data.success) {
-          const { name, companyName, mobile, phone, address, email } = response.data.data;
-          setFormData({ name, companyName, mobile: mobile || phone, address, email, password: "" });
-        }
-      } catch (err) {
-        console.error("Failed to fetch vendor:", err);
-        setError("Could not load vendor data.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchVendorDetails();
-  }, [id, navigate]);
+    dispatch(fetchVendorById(id));
+  }, [dispatch, id, navigate]);
+
+  useEffect(() => {
+    if (current?._id === id) {
+      const { name, companyName, mobile, phone, address, email } = current;
+      setFormData({ name, companyName, mobile: mobile || phone, address, email, password: "" });
+    }
+  }, [current, id]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -53,8 +43,6 @@ const EditVendor = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("adminToken");
-    setIsLoading(true);
     setError("");
 
     // Only send fields required by the update API
@@ -71,20 +59,16 @@ const EditVendor = () => {
     }
 
     try {
-      await axios.put(`${API_URL}/${id}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await dispatch(updateVendor({ id, data: payload })).unwrap();
       alert("Vendor updated successfully!");
       navigate("/vendors");
     } catch (err) {
       console.error("Update failed:", err);
-      setError(err.response?.data?.message || "Update failed.");
-    } finally {
-      setIsLoading(false);
+      setError(err?.message || "Update failed.");
     }
   };
   
-  if (isLoading && !formData.name) return <div className="p-6 text-center">Loading...</div>
+  if (isBusy && !formData.name) return <div className="p-6 text-center">Loading...</div>
 
   return (
     <div className="bg-gray-100 min-h-screen w-full p-4 sm:p-6 flex flex-col">
@@ -125,8 +109,8 @@ const EditVendor = () => {
           </div>
           {error && <p className="text-red-500 text-center">{error}</p>}
           <div className="flex justify-center pt-4">
-            <button type="submit" disabled={isLoading} className="bg-[#7EC1B1] text-white font-medium px-20 py-2 hover:bg-[#65a89d] transition disabled:bg-gray-400">
-              {isLoading ? 'Saving...' : 'Save'}
+          <button type="submit" disabled={isBusy} className="bg-[#7EC1B1] text-white font-medium px-20 py-2 hover:bg-[#65a89d] transition disabled:bg-gray-400">
+              {isBusy ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>

@@ -60,8 +60,8 @@ const ConfirmDeletionModal = ({
   if (!isOpen) return null;
 
   return (
-    // ✅ Soft grey overlay background
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-100 bg-opacity-80">
+    // ✅ Transparent overlay background
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
       <div className="bg-white rounded-2xl shadow-2xl w-[95%] max-w-2xl p-12 text-center border border-gray-200 transition-transform duration-300 ease-in-out">
         {/* ✅ Dynamic Title */}
         <h2 className="text-4xl font-bold text-gray-800 mb-6">{title}</h2>

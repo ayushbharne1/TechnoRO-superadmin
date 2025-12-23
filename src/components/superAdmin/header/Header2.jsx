@@ -191,6 +191,8 @@ const Header2 = ({ title }) => {
     "/vendors": "Vendors",
     "/vendors/addvendor": "Add Vendor",
     "/vendors/editvendor/:id": "Edit Vendor",
+    "/vendors/viewvendor": "Vendor Details",
+    "/vendors/viewvendor/:id": "Vendor Details",
     "/pendingServices": "Pending Services",
     "/technicianActivity": "Technician Activity",
     "/technicianMonitoring": "Technician Monitor",

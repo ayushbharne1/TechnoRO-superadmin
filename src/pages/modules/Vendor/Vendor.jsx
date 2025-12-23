@@ -2,51 +2,37 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchVendors } from "../../../redux/slices/vendorSlice";
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { GoEye } from "react-icons/go";
 import { FiSearch } from "react-icons/fi";
 import Header2 from "../../../components/superAdmin/header/Header2";
 
-const API_URL = "https://ro-service-engineer-be.onrender.com/api/admin/vendor";
-
 const Vendor = () => {
-  const [rows, setRows] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { list: rows, loading: isLoading } = useSelector((s) => s.vendor);
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(6);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
-  const fetchVendors = useCallback(async () => {
+  const load = useCallback(() => {
     const token = localStorage.getItem("adminToken");
     if (!token) {
       navigate("/");
       return;
     }
-    setIsLoading(true);
-    try {
-      const response = await axios.get(API_URL, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { search },
-      });
-      if (response.data.success) {
-        setRows(response.data.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch vendors:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [navigate, search]);
+    dispatch(fetchVendors({ search }));
+  }, [dispatch, navigate, search]);
 
   useEffect(() => {
-    fetchVendors();
-  }, [fetchVendors]);
+    load();
+  }, [load]);
   
   const handleAdd = () => navigate("/vendors/addvendor");
-  const handleView = (row) => navigate(`/vendors/details/${row._id}`);
+  const handleView = (row) => navigate(`/vendors/viewvendor/${row._id}`);
   const handleEdit = (row) => navigate(`/vendors/editvendor/${row._id}`);
 
   // CORRECTED: This function now informs the user that delete is not available.

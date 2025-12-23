@@ -2,28 +2,28 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { addManufacturer } from "../../../redux/slices/manufacturerSlice";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import bankIcon from "../../../assets/proicons_bank.png";
 
-const API_URL = "https://ro-service-engineer-be.onrender.com/api/admin/manufacturer";
-
 const AddManufacturer = () => {
+  const dispatch = useDispatch();
+  const { loading: isSubmitting } = useSelector((s) => s.manufacturer);
   const [formData, setFormData] = useState({
     name: "",
-    companyName: "",
     phone: "",
     address: "",
     email: "",
     aadhaar: "", // The form state can keep this name
     pan: "",       // The form state can keep this name
     gst: "",
+    accountHolderName: "",
     bankName: "",
     accountNumber: "",
     ifscCode: "",
     accountType: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -40,48 +40,45 @@ const AddManufacturer = () => {
     }
 
     // CORRECTED: This payload now uses 'phone', 'aadharNo', and 'panNo' as required by the 'create' API.
-    const payload = {
-      name: formData.name,
-      phone: formData.phone,
-      email: formData.email,
-      password: "password123",
-      companyName: formData.companyName,
-      address: formData.address,
-      gst: formData.gst,
-      panNo: formData.pan,        // FIX: Changed 'pan' to 'panNo'
-      aadharNo: formData.aadhaar, // FIX: Changed 'aadhaar' to 'aadharNo'
-      bankDetails: {
-        bankName: formData.bankName,
-        accountNumber: formData.accountNumber,
-        ifscCode: formData.ifscCode,
-        accountType: formData.accountType,
-      },
+    const bankDetails = {
+      accountHolderName: formData.accountHolderName,
+      bankName: formData.bankName,
+      accountNumber: formData.accountNumber,
+      ifscCode: formData.ifscCode,
+      accountType: formData.accountType,
     };
 
-    setIsLoading(true);
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      password: "password123",
+      aadharNo: formData.aadhaar,
+      panNo: formData.pan,
+      gst: formData.gst,
+      bankDetails,
+      address: formData.address,
+    };
+
     setError("");
 
     try {
-      await axios.post(`${API_URL}/create`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await dispatch(addManufacturer(payload)).unwrap();
       alert("Manufacturer added successfully!");
       navigate("/manufacturer");
     } catch (err) {
-      console.error("Failed to add manufacturer:", err.response.data);
-      if (err.response && err.response.data && err.response.data.errors) {
-        const errorMessages = err.response.data.errors.map(e => `${e.field}: ${e.message}`).join('\n');
+      console.error("Failed to add manufacturer:", err);
+      if (err?.errors) {
+        const errorMessages = err.errors.map(e => `${e.field}: ${e.message}`).join('\n');
         setError(errorMessages);
       } else {
-        setError(err.response?.data?.message || "An error occurred. Please check all fields.");
+        setError(err?.message || "An error occurred. Please check all fields.");
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col">
+    <div className="bg-white min-h-screen flex flex-col">
       <Header2 />
       <div className="bg-white p-6 shadow-lg flex flex-col gap-8 w-full h-full">
         <div className="flex flex-col md:flex-row gap-6 w-full">
@@ -96,10 +93,6 @@ const AddManufacturer = () => {
         </div>
         
         <div className="flex flex-col md:flex-row gap-6 w-full">
-           <div className="flex-1 flex flex-col gap-2">
-            <label className="font-poppins font-medium text-gray-700 text-[16px]">Company Name</label>
-            <input type="text" name="companyName" placeholder="Enter Company Name" value={formData.companyName} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5]" />
-          </div>
            <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">Email</label>
             <input type="email" name="email" placeholder="Enter Email" value={formData.email} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5]" />
@@ -144,6 +137,13 @@ const AddManufacturer = () => {
           </div>
         </div>
 
+        <div className="flex flex-col md:flex-row gap-6 w-full">
+          <div className="flex-1 flex flex-col gap-2">
+            <label className="font-poppins font-medium text-gray-700 text-[16px]">Account Holder Name</label>
+            <input type="text" name="accountHolderName" placeholder="Enter Account Holder Name" value={formData.accountHolderName} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5]" />
+          </div>
+        </div>
+
         <div className="flex flex-col md:flex-row gap-6 w-full mt-4">
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">IFSC</label>
@@ -162,8 +162,8 @@ const AddManufacturer = () => {
         {error && <pre className="text-red-500 text-center whitespace-pre-wrap">{error}</pre>}
         
         <div className="flex justify-center w-full mt-6">
-          <button onClick={handleAdd} disabled={isLoading} className="bg-[#7EC1B1] text-white font-poppins font-semibold px-6 py-3 rounded-lg hover:bg-[#65a89d] transition w-full md:w-1/8 disabled:bg-gray-400">
-            {isLoading ? "Adding..." : "Add"}
+          <button onClick={handleAdd} disabled={isSubmitting} className="bg-[#7EC1B1] text-white font-poppins font-semibold px-6 py-3 rounded-lg hover:bg-[#65a89d] transition w-full md:w-1/8 disabled:bg-gray-400">
+            {isSubmitting ? "Adding..." : "Add"}
           </button>
         </div>
       </div>

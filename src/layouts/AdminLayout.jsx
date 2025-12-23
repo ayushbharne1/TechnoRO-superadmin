@@ -284,7 +284,7 @@ const AdminLayout = () => {
               <Route path="/vendors" element={<Vendor />} />
               <Route path="/vendors/addvendor" element={<AddVendor />} />
               <Route path="/vendors/editvendor/:id" element={<EditVendor />} />
-              <Route path="/vendors/details/:id" element={<ViewVendor />} />
+              <Route path="/vendors/viewvendor/:id" element={<ViewVendor />} />
 
               {/* SERVICE ENGINEER */}
               <Route path="/service-engineer" element={<Engineer />} />

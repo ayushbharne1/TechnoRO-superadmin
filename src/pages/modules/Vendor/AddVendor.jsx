@@ -2,12 +2,14 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { addVendor } from "../../../redux/slices/vendorSlice";
 import Header2 from "../../../components/superAdmin/header/Header2";
 
-const API_URL = "https://ro-service-engineer-be.onrender.com/api/admin/vendor";
-
 const AddVendor = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading: isLoading, error: reduxError } = useSelector((s) => s.vendor);
   const [formData, setFormData] = useState({
     name: "",
     companyName: "",
@@ -16,15 +18,14 @@ const AddVendor = () => {
     email: "",
     password: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleAdd = async () => {
+  const handleAdd = async (e) => {
+    e.preventDefault();
     const token = localStorage.getItem("adminToken");
     if (!token) {
       navigate("/");
@@ -39,19 +40,14 @@ const AddVendor = () => {
       companyName: formData.companyName,
       address: formData.address,
     };
-    setIsLoading(true);
     setError("");
     try {
-      await axios.post(API_URL, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await dispatch(addVendor(payload)).unwrap();
       alert("Vendor added successfully!");
       navigate("/vendors");
     } catch (err) {
       console.error("Failed to add vendor:", err);
-      setError(err.response?.data?.message || "An error occurred. Please check all fields.");
-    } finally {
-      setIsLoading(false);
+      setError(err?.message || "An error occurred. Please check all fields.");
     }
   };
 
@@ -93,7 +89,7 @@ const AddVendor = () => {
         {error && <p className="text-red-500 text-center">{error}</p>}
         
         <div className="flex justify-center w-full mt-6">
-          <button onClick={handleAdd} disabled={isLoading} className="bg-[#7EC1B1] text-white font-poppins font-semibold px-6 py-3 rounded-lg hover:bg-[#65a89d] transition w-full md:w-1/8 disabled:bg-gray-400">
+        <button onClick={handleAdd} disabled={isLoading} className="bg-[#7EC1B1] text-white font-poppins font-semibold px-6 py-3 rounded-lg hover:bg-[#65a89d] transition w-full md:w-1/8 disabled:bg-gray-400">
             {isLoading ? "Adding..." : "Add"}
           </button>
         </div>

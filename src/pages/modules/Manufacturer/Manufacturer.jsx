@@ -1,70 +1,49 @@
-// src/pages/manufacturer/Manufacturer.jsx - VERIFIED AND CORRECTED
-
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchManufacturers, deleteManufacturer } from "../../../redux/slices/manufacturerSlice";
 import { GoEye } from "react-icons/go";
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import searchIcon from "../../../assets/search.png";
 
-const API_URL = "https://ro-service-engineer-be.onrender.com/api/admin/manufacturer";
-
 const Manufacturer = () => {
-  const [rows, setRows] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { list: rows, loading: isLoading } = useSelector((s) => s.manufacturer);
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(9);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
-  const fetchManufacturers = useCallback(async () => {
+  const load = useCallback(() => {
     const token = localStorage.getItem("adminToken");
     if (!token) {
       navigate("/");
       return;
     }
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`${API_URL}/all`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { search },
-      });
-      if (response.data.success) {
-        setRows(response.data.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch manufacturers:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [navigate, search]);
+    dispatch(fetchManufacturers({ search }));
+  }, [dispatch, navigate, search]);
 
   useEffect(() => {
-    fetchManufacturers();
-  }, [fetchManufacturers]);
+    load();
+  }, [load]);
 
   const handleAdd = () => navigate("/manufacturer/addmanufacturer");
   const handleEdit = (row) => navigate(`/manufacturer/editmanufacturer/${row._id}`);
   const handleView = (row) => navigate(`/manufacturer/viewmanufacturer/${row._id}`);
 
-  // CORRECTED: This now performs a permanent delete
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to permanently delete this manufacturer? This action cannot be undone.")) {
       return;
     }
-    const token = localStorage.getItem("adminToken");
     try {
-      // Using the correct DELETE endpoint from the documentation
-      await axios.delete(`${API_URL}/delete/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await dispatch(deleteManufacturer(id)).unwrap();
       alert("Manufacturer deleted successfully!");
-      fetchManufacturers(); // Refresh the list
+      load();
     } catch (error) {
       console.error("Failed to delete manufacturer:", error);
-      alert("Failed to delete manufacturer.");
+      alert(error?.message || "Failed to delete manufacturer.");
     }
   };
 
@@ -81,7 +60,7 @@ const Manufacturer = () => {
   };
 
   return (
-    <div className="p-4 h-full overflow-y-auto flex flex-col gap-2">
+    <div className="bg-white p-4 h-full overflow-y-auto flex flex-col gap-2">
       <Header2 />
       <div className="flex flex-col md:flex-row justify-between items-center p-2 md:p-4 gap-2 md:gap-4">
         <div className="flex items-center gap-2 flex-wrap">
@@ -109,7 +88,7 @@ const Manufacturer = () => {
           </button>
         </div>
       </div>
-      <div className="bg-white p-4 w-full rounded-lg shadow overflow-x-auto">
+      <div className="bg-white  overflow-x-auto">
         <table className="table-auto w-full border border-gray-400 min-w-[600px] sm:min-w-[700px]">
           <thead>
             <tr className="bg-[#F3F4F6] text-center text-base sm:text-xl">
@@ -126,7 +105,7 @@ const Manufacturer = () => {
               <tr key={row._id} className="text-black font-poppins text-[14px] sm:text-[16px]">
                 <td className="p-3">{(page - 1) * rowsPerPage + index + 1}</td>
                 <td className="p-3">{row.name}</td>
-                <td className="p-3">{row.mobile || row.phone}</td>
+                <td className="p-3">{row.phone}</td>
                 <td className="p-3 hidden sm:table-cell">{row.email}</td>
                 <td className="p-3 hidden lg:table-cell">{row.address}</td>
                 <td className="p-3 flex gap-2 justify-center flex-wrap">
