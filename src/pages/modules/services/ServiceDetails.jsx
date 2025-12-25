@@ -1,17 +1,23 @@
-
-
-
-import React from "react";
+import { React, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import sampleImage from "../../../assets/water-purifier.svg";
-
+import { useDispatch, useSelector } from "react-redux";
+import { fetchServiceById } from "../../../redux/slices/serviceSlice";
 
 const ServiceDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const service = location.state;
 
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchServiceById(location.state._id));
+  }, [dispatch]);
+
+  const { current, loading } = useSelector((state) => state.service);
+
+  const service = current || location.state;
 
   if (!service) {
     return (
@@ -26,7 +32,6 @@ const ServiceDetails = () => {
       </div>
     );
   }
-
 
   return (
     <div className="bg-gray-100 min-h-screen p-4 md:p-6">
@@ -45,10 +50,11 @@ const ServiceDetails = () => {
             />
           </div>
 
-
           {/* Service Details */}
           <div className="flex-1 w-full">
-            <h2 className="text-lg md:text-xl font-poppins mb-2">{service.serviceAMC}</h2>
+            <h2 className="text-lg md:text-xl font-poppins mb-2">
+              {service.serviceAMC}
+            </h2>
             <div className="flex flex-wrap items-center gap-1 md:gap-2 text-base md:text-lg font-semibold text-[#7EC1B1] mb-1">
               {service.price}
               <span className="text-gray-500 text-sm md:text-base font-normal">
@@ -63,38 +69,13 @@ const ServiceDetails = () => {
               <span className="font-semibold text-black">Techno RO.</span>
             </p>
 
-
             <h3 className="text-base md:text-lg font-semibold border-b border-gray-200 pb-2 mb-3">
               Description
             </h3>
 
-
             <ul className="text-gray-600 list-disc ml-5 space-y-2 text-sm md:text-base">
-              <li>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet,
-                tempora.lorem ipsum dolor sit amet consectetur adipisicing elit. Amet, tempora.
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Illum autem excepturi nostrum atque natus mollitia vel recusandae
-                libero fugiat, impedit nisi eaque molestiae, sapiente explicabo dicta quo delectus
-              </li>
-              <li>
-                Varius sed maecenas donec lobortis eu ornare arcu fermentum. Lorem ipsum, dolor sit amet
-                consectetur adipisicing elit.
-                Mollitia facere itaque, iste est eius ut nihil recusandae laboriosam ipsa quaerat nulla quidem,
-                nam molestiae veniam odit sunt perferendis voluptatum tempora. Lorem ipsum,
-                dolor sit amet consectetur a
-              </li>
-              <li>
-                Facilisis nunc in scelerisque aenean dolor felis in odio. Lorem, ipsum dolor sit amet
-                consectetur adipisicing elit. Iste aliquam dolor temporibus, doloribus aliquid non
-                exercitationem aut impedit voluptate est ea libero ratione unde nihil quidem quod nisi
-                dolores sit. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Officiis animi,
-                tempore rerum debitis nesciunt pariatur quam necessitatibus voluptate facilis placeat rem at
-                ratione maxime veniam atque dicta perspiciatis tempora. Veritatis.
-              </li>
+              {service.description || "No description available."}
             </ul>
-
-
-           
           </div>
         </div>
       </div>
@@ -102,8 +83,4 @@ const ServiceDetails = () => {
   );
 };
 
-
 export default ServiceDetails;
-
-
-

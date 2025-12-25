@@ -1,66 +1,116 @@
-
-
-
-
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Header2 from "../../../components/superAdmin/header/Header2";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchServiceById,
+  updateService,
+} from "../../../redux/slices/serviceSlice";
 
-
-
-
-import DeleteIcon from "../../../assets/delete.svg"
-
+import DeleteIcon from "../../../assets/delete.svg";
 
 const EditService = () => {
-    const [category, setCategory] = useState("");
-    const [service, setService] = useState("");
-    const [price, setPrice] = useState("");
-    const [warrenty, setWarrenty] = useState("");
-    const [discount, setDiscount] = useState("");
-    const [description, setDescription] = useState("");
-    const [images, setImages] = useState([]);
+  /* ===================== LOCAL STATE ===================== */
+  const [category, setCategory] = useState("");
+  const [service, setService] = useState("");
+  const [price, setPrice] = useState("");
+  const [warrenty, setWarrenty] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [description, setDescription] = useState("");
+  const [images, setImages] = useState([]);
 
+ //  ROUTER 
+  const location = useLocation();
+  const data = location.state;
 
-    const location = useLocation();
-    const data = location.state;
+  /* ===================== REDUX ===================== */
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
+  const { current, loading } = useSelector(
+    (state) => state.service
+  );
 
-    useEffect(() => {
-    if (data) {
-      setCategory(data.category || "");
-      setService(data.serviceAMC || "");
-      setPrice(data.price || "");
-      setWarrenty(data.warrenty || "");
-      setDiscount(data.discount || "");
-      setDescription(data.description || "");
-      setImages(data.images || []);
+  /* ===================== FETCH SERVICE BY ID ===================== */
+  useEffect(() => {
+    if (data?._id) {
+      dispatch(fetchServiceById(data._id));
     }
-  }, [data]);
+  }, [dispatch, data]);
 
+//   PREFILL FORM 
 
+  useEffect(() => {
+    const source = current || data;
+    if (!source) return;
 
+    setCategory(source.category || "");
+    setService(source.serviceAMC || source.name || "");
+    setPrice(source.price || "");
+    setWarrenty(source.warrenty || source.warranty || "");
+    setDiscount(source.discount || "");
+    setDescription(source.description || "");
+    setImages(source.images || []);
+  }, [current, data]);
 
-    const handleAdd = () => {
-        console.log({ category, service, price, warrenty, discount,description,images });
-    };
+//   UPDATE SERVICE (PUT API) 
 
+  const handleAdd = async () => {
+    if (service.trim().length < 3) {
+      alert("Service name must be at least 3 characters");
+      return;
+    }
 
-    const handleImageUpload = (e) => {
-        const selectedFiles = Array.from(e.target.files);
-        if (images.length + selectedFiles.length > 3) {
-            alert("You can upload a maximum of 3 images.");
-            return;
-        }
-        setImages([...images, ...selectedFiles]);
-    };
+    try {
+      const id = (current || data)?._id;
+      if (!id) return;
 
+      const payload = {
+        category,
+        name: service.trim(),
+        price: price.toString(), // backend expects STRING
+        warranty: warrenty,
+        discount,
+        description,
+      };
 
-    const handleDeleteImage = (index) => {
-        const updated = [...images];
-        updated.splice(index, 1);
-        setImages(updated);
-    };
+      console.log("UPDATE PAYLOAD:", payload);
+
+      await dispatch(
+        updateService({
+          id,
+          data: payload,
+        })
+      ).unwrap();
+
+      navigate("/services");
+    } catch (error) {
+      console.error("UPDATE ERROR:", error);
+      alert(
+        error?.errors?.[0]?.message ||
+          error?.message ||
+          "Failed to update service"
+      );
+    }
+  };
+
+//   IMAGE HANDLERS 
+
+  const handleImageUpload = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    if (images.length + selectedFiles.length > 3) {
+      alert("You can upload a maximum of 3 images.");
+      return;
+    }
+    setImages([...images, ...selectedFiles]);
+  };
+
+  const handleDeleteImage = (index) => {
+    const updated = [...images];
+    updated.splice(index, 1);
+    setImages(updated);
+  };
+
 
 
     return (
@@ -86,8 +136,8 @@ const EditService = () => {
                             className="p-3 border border-gray-300 rounded bg-[#F9F9F9] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
                         >
                             <option value="">Select Category</option>
-                            <option value="Spare Parts">Service</option>
-                            <option value="Water Purifier">AMC Plan</option>
+                            <option value="Service">Service</option>
+                            <option value="AMC">AMC Plan</option>
                         </select>
                     </div>
 

@@ -1,31 +1,61 @@
-
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PreviewIcon from "../../../assets/preview1.svg";
 import EditIcon from "../../../assets/edit1.svg";
 import Deleteicon from "../../../assets/delete.svg";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import SearchIcon from "../../../assets/search.png";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchServices } from "../../../redux/slices/serviceSlice";
 
 const Services = () => {
-  const [rows, setRows] = useState([
-    { id: 1, category: "Service", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-    { id: 2, category: "AMC Plan", serviceAMC: "Silver Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹1899.00", warrenty: "1 Year", discount: "10%" },
-    { id: 3, category: "Service", serviceAMC: "Gold Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹2899.00", warrenty: "1 Year", discount: "10%" },
-    { id: 4, category: "AMC Plan", serviceAMC: "Dimond Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹3899.00", warrenty: "1 Year", discount: "10%" },
-    { id: 5, category: "AMC Plan", serviceAMC: "Platinum Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹4899.00", warrenty: "1 Year", discount: "10%" },
-    { id: 6, category: "Service", serviceAMC: "Installation RO Water Purifier Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-    { id: 7, category: "AMC Plan", serviceAMC: "Uninstallation RO Water Purifier Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-    { id: 8, category: "AMC Plan", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-    { id: 9, category: "Service", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-    { id: 10, category: "AMC Plan", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-  ]);
+  // const [rows, setRows] = useState([
+  //   { id: 1, category: "Service", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
+  //   { id: 2, category: "AMC Plan", serviceAMC: "Silver Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹1899.00", warrenty: "1 Year", discount: "10%" },
+  //   { id: 3, category: "Service", serviceAMC: "Gold Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹2899.00", warrenty: "1 Year", discount: "10%" },
+  //   { id: 4, category: "AMC Plan", serviceAMC: "Dimond Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹3899.00", warrenty: "1 Year", discount: "10%" },
+  //   { id: 5, category: "AMC Plan", serviceAMC: "Platinum Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹4899.00", warrenty: "1 Year", discount: "10%" },
+  //   { id: 6, category: "Service", serviceAMC: "Installation RO Water Purifier Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
+  //   { id: 7, category: "AMC Plan", serviceAMC: "Uninstallation RO Water Purifier Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
+  //   { id: 8, category: "AMC Plan", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
+  //   { id: 9, category: "Service", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
+  //   { id: 10, category: "AMC Plan", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
+  // ]);
+
+  const dispatch = useDispatch();
+
+  const { list: apiRows = [], loading } = useSelector((state) => state.service);
+
+  const [rows, setRows] = useState([]);
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(7);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  /* ===================== 3. useEffect #1 (FETCH API) ===================== */
+
+  useEffect(() => {
+    dispatch(fetchServices());
+  }, [dispatch]);
+
+  /* ===================== 4. useEffect #2 (API → UI MAPPING) ===================== */
+
+  useEffect(() => {
+    if (!apiRows.length) return;
+
+    const uiRows = apiRows.map((row, index) => ({
+      id: index + 1,
+      _id: row._id,
+      category: row.category,
+      serviceAMC: row.name,
+      price: `₹${row.price}.00`,
+      warrenty: row.warranty || "NA",
+      discount: row.discount || "NA",
+    }));
+
+    setRows(uiRows);
+  }, [apiRows]);
 
   const navigate = useNavigate();
   const navigate2 = useNavigate();
@@ -57,9 +87,10 @@ const Services = () => {
       <Header2 />
 
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow flex flex-col gap-4 overflow-x-auto">
+        {loading && <p className="text-center py-2">Loading services...</p>}
 
         {/* Top Controls */}
-        <div className="flex flex-wrap justify-between items-center gap-4">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
           <div className="flex flex-wrap items-center gap-4 ">
             <div className="flex items-center gap-2 flex-wrap text-sm md:text-base mr-10">
               <span>Show</span>
@@ -69,7 +100,9 @@ const Services = () => {
                 className="p-1 md:p-2 border rounded bg-gray-100 w-[60px]"
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                  <option key={num} value={num}>{num}</option>
+                  <option key={num} value={num}>
+                    {num}
+                  </option>
                 ))}
               </select>
               <span>Entries</span>
@@ -119,45 +152,85 @@ const Services = () => {
             <thead className="hidden md:table-header-group">
               <tr className="bg-gray-100 text-center text-sm md:text-lg">
                 <th className="p-2 md:p-3 font-poppins font-medium">Sr. No.</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">Category</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">Service & AMC Plan Name</th>
+                <th className="p-2 md:p-3 font-poppins font-medium">
+                  Category
+                </th>
+                <th className="p-2 md:p-3 font-poppins font-medium">
+                  Service & AMC Plan Name
+                </th>
                 <th className="p-2 md:p-3 font-poppins font-medium">Price</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">Warrenty/Validity</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">Discount</th>
+                <th className="p-2 md:p-3 font-poppins font-medium">
+                  Warrenty/Validity
+                </th>
+                <th className="p-2 md:p-3 font-poppins font-medium">
+                  Discount
+                </th>
                 <th className="p-2 md:p-3 font-poppins font-medium">Action</th>
               </tr>
             </thead>
             <tbody className="text-center text-sm md:text-base">
               {paginatedRows.map((row) => (
-                <tr key={row.id} className="bg-white text-black block md:table-row mb-4 md:mb-0 p-2 md:p-0 rounded-lg shadow md:shadow-none">
+                <tr
+                  key={row.id}
+                  className="bg-white text-black block md:table-row mb-4 md:mb-0 p-2 md:p-0 rounded-lg shadow md:shadow-none"
+                >
                   <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Sr. No.: </span>{row.id}
+                    <span className="md:hidden font-semibold">Sr. No.: </span>
+                    {row.id}
                   </td>
                   <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Category: </span>{row.category}
+                    <span className="md:hidden font-semibold">Category: </span>
+                    {row.category}
                   </td>
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center max-w-full sm:truncate md:max-w-[200px]" title={row.serviceAMC}>
-                    <span className="md:hidden font-semibold">Service/AMC: </span>{row.serviceAMC}
+                  <td
+                    className="p-2 md:p-3 block md:table-cell text-left md:text-center max-w-full sm:truncate md:max-w-[200px]"
+                    title={row.serviceAMC}
+                  >
+                    <span className="md:hidden font-semibold">
+                      Service/AMC:{" "}
+                    </span>
+                    {row.serviceAMC}
                   </td>
                   <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Price: </span>{row.price}
+                    <span className="md:hidden font-semibold">Price: </span>
+                    {row.price}
                   </td>
                   <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Warrenty: </span>{row.warrenty}
+                    <span className="md:hidden font-semibold">Warrenty: </span>
+                    {row.warrenty}
                   </td>
                   <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Discount: </span>{row.discount}
+                    <span className="md:hidden font-semibold">Discount: </span>
+                    {row.discount}
                   </td>
                   <td className="p-2 md:p-3 flex gap-2 justify-start md:justify-center flex-wrap">
                     <span className="md:hidden font-semibold">Action: </span>
                     <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
-                      <img src={PreviewIcon} onClick={() => navigate2("/services/servicedetails", { state: row })} alt="preview" className="w-4 h-4 md:w-5 md:h-5 cursor-pointer" />
+                      <img
+                        src={PreviewIcon}
+                        onClick={() =>
+                          navigate2("/services/servicedetails", { state: row })
+                        }
+                        alt="preview"
+                        className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                      />
                     </div>
                     <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
-                      <img src={EditIcon} onClick={() => navigate3("/services/editservice", { state: row })} alt="edit" className="w-4 h-4 md:w-5 md:h-5 cursor-pointer" />
+                      <img
+                        src={EditIcon}
+                        onClick={() =>
+                          navigate3("/services/editservice", { state: row })
+                        }
+                        alt="edit"
+                        className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                      />
                     </div>
                     <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
-                      <img src={Deleteicon} alt="delete" className="w-4 h-4 md:w-5 md:h-5 cursor-pointer" />
+                      <img
+                        src={Deleteicon}
+                        alt="delete"
+                        className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                      />
                     </div>
                   </td>
                 </tr>
@@ -169,7 +242,10 @@ const Services = () => {
         {/* Pagination */}
         <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-2 flex-wrap font-semibold text-gray-700 text-sm md:text-base">
           <span>
-            Showing {Math.min((page - 1) * rowsPerPage + 1, filteredRows.length)} to {Math.min(page * rowsPerPage, filteredRows.length)} of {filteredRows.length} entries
+            Showing{" "}
+            {Math.min((page - 1) * rowsPerPage + 1, filteredRows.length)} to{" "}
+            {Math.min(page * rowsPerPage, filteredRows.length)} of{" "}
+            {filteredRows.length} entries
           </span>
           <div className="flex flex-wrap gap-2 text-[#7EC1B1] justify-center">
             <button
@@ -183,7 +259,9 @@ const Services = () => {
               <button
                 key={idx}
                 onClick={() => handlePageChange(idx + 1)}
-                className={`p-1 md:p-2 border rounded-lg border-[#7EC1B1] ${page === idx + 1 ? "bg-[#7EC1B1] text-white" : ""} w-[30px] md:w-[36px]`}
+                className={`p-1 md:p-2 border rounded-lg border-[#7EC1B1] ${
+                  page === idx + 1 ? "bg-[#7EC1B1] text-white" : ""
+                } w-[30px] md:w-[36px]`}
               >
                 {idx + 1}
               </button>
@@ -203,5 +281,3 @@ const Services = () => {
 };
 
 export default Services;
-
-

@@ -1,49 +1,69 @@
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts } from "../../../redux/slices/productSlice"; 
 import PreviewIcon from "../../../assets/preview1.svg";
 import SearchIcon from "../../../assets/search.png";
 import Header2 from '../../../components/superAdmin/header/Header2';
+import { Edit, Trash2, Plus } from "lucide-react"; 
+import {  deleteProduct, clearSuccessMessage } from "../../../redux/slices/productSlice"; 
+import { toast } from "react-toastify"; // Import toast
 
 const Product = () => {
-  const [rows, setRows] = useState([
-    { id: 1, category: "Water Purifier", product: "KENT ACE Plus- B 8 L RO + UV + UF + Alkaline + Copper + TDS Control + UV LED Water Purifier .0001 Micron RO Membrane | Auto Flush | 8L | 20LPH | (Black)", price: "₹24999.00", warranty: "2 Years", discount: "10%", status: "Approved" },
-    { id: 2, category: "Water Ionizer", product: "Kent Grand Plus RO", price: "₹24999.00", warranty: "2 Years", discount: "5%", status: "Approved" },
-    { id: 3, category: "Water Softner", product: "KENT ACE Plus- B 8 L RO + UV + UF + Alkaline + Copper + TDS Control + UV LED Water Purifier .0001 Micron RO Membrane | Auto Flush | 8L | 20LPH | (Black)", price: "₹24999.00", warranty: "2 Years", discount: "15%", status: "Rejected" },
-    { id: 4, category: "RO Plants", product: "Kent Grand Plus RO", price: "₹24999.00", warranty: "2 Years", discount: "8%", status: "Pending" },
-    { id: 5, category: "Spare Parts", product: "KENT ACE Plus- B 8 L RO + UV + UF + Alkaline + Copper + TDS Control + UV LED Water Purifier .0001 Micron RO Membrane | Auto Flush | 8L | 20LPH | (Black)", price: "₹24999.00", warranty: "2 Years", discount: "12%", status: "Rejected" },
-    { id: 6, category: "Water Softner", product: "Kent Grand Plus RO", price: "₹24999.00", warranty: "2 Years", discount: "7%", status: "Approved" },
-    { id: 7, category: "Water Purifier", product: "KENT ACE Plus- B 8 L RO + UV + UF + Alkaline + Copper + TDS Control + UV LED Water Purifier .0001 Micron RO Membrane | Auto Flush | 8L | 20LPH | (Black)", price: "₹24999.00", warranty: "2 Years", discount: "6%", status: "Pending" },
-    { id: 8, category: "Water Ionizer", product: "Kent Grand Plus RO", price: "₹24999.00", warranty: "2 Years", discount: "10%", status: "Pending" },
-    { id: 9, category: "RO Plants", product: "KENT ACE Plus- B 8 L RO + UV + UF + Alkaline + Copper + TDS Control + UV LED Water Purifier .0001 Micron RO Membrane | Auto Flush | 8L | 20LPH | (Black)", price: "₹24999.00", warranty: "2 Years", discount: "10%", status: "Approved" },
-    { id: 10, category: "Spare Parts", product: "Kent Grand Plus RO", price: "₹24999.00", warranty: "2 Years", discount: "10%", status: "Rejected" },
-  ]);
-
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(7);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Local State
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+
+  // Get successMessage to show toast
+  const { products, pagination, loading, successMessage } = useSelector((state) => state.products);
+
+  // ✅ Handle Toast for Delete
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(clearSuccessMessage());
+    }
+  }, [successMessage, dispatch]);
+
+  // ✅ NEW: Handle Delete Click
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      dispatch(deleteProduct(id));
+    }
+  };
+
+  // Fetch Data
+  useEffect(() => {
+    dispatch(fetchProducts({ 
+      page, 
+      limit: rowsPerPage, 
+      search, 
+      category: categoryFilter 
+    }));
+  }, [dispatch, page, rowsPerPage, search, categoryFilter]);
 
   const handleRowsPerPage = (e) => {
     setRowsPerPage(Number(e.target.value));
     setPage(1);
   };
 
-  const filteredRows = rows
-    .filter((row) => row.product.toLowerCase().includes(search.toLowerCase()))
-    .filter((row) => (statusFilter ? row.category === statusFilter : true));
-
-  const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-  const paginatedRows = filteredRows.slice(
-    (page - 1) * rowsPerPage,
-    page * rowsPerPage
-  );
-
   const handlePageChange = (newPage) => {
-    if (newPage > 0 && newPage <= totalPages) setPage(newPage);
+    if (newPage > 0 && newPage <= pagination.pages) setPage(newPage);
+  };
+
+  // Status Styling
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "approved": return "text-[#34C759]";
+      case "pending": return "text-[#FFCC00]";
+      case "rejected": return "text-[#FF383C]";
+      default: return "text-gray-600";
+    }
   };
 
   return (
@@ -51,154 +71,169 @@ const Product = () => {
       <Header2 />
 
       {/* Table Container */}
-      <div className="bg-[#FFFFFF] p-3 md:p-4 w-full rounded-lg shadow overflow-x-auto">
+      <div className="bg-white p-3 md:p-4 w-full rounded-lg shadow overflow-x-auto">
+        
+        {/* Title */}
+        <div className="mb-4 px-2">
+            <h2 className="text-xl font-bold text-gray-800">Product List</h2>
+        </div>
 
-        {/* Controls */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-2 md:p-4 text-gray-600 font-semibold gap-4 flex-wrap">
-          <div className="flex flex-wrap items-center gap-4 md:gap-10 w-full md:w-auto">
-            <div className="flex items-center gap-2 flex-wrap text-sm md:text-base">
-              <span>Show</span>
-              <select
-                value={rowsPerPage}
-                onChange={handleRowsPerPage}
-                className=" bg-gray-100 p-1 md:p-2 border rounded w-[60px]"
-              >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                  <option key={num} value={num}>{num}</option>
-                ))}
-              </select>
-              <span>Entries</span>
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap text-sm md:text-base">
-              <div className="relative w-full max-w-[200px]">
-                <img
-                  src={SearchIcon}
-                  alt="Search"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5"
-                />
-                <input
-                  type="text"
-                  placeholder="Search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="bg-gray-100 p-1 pl-8 md:p-2 md:pl-9 border rounded w-full text-sm md:text-base"
-                />
-              </div>
-            </div>
+        {/* Controls Row */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 px-2">
+          
+          {/* Left: Show Entries */}
+          <div className="flex items-center gap-3 text-gray-700 font-medium">
+            <span>Show</span>
+            <select
+              value={rowsPerPage}
+              onChange={handleRowsPerPage}
+              className="bg-gray-50 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-[#7EC1B1]"
+            >
+              {[7, 10, 20, 50].map(num => <option key={num} value={num}>{num}</option>)}
+            </select>
+            <span>Entries</span>
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto">
+          {/* Right: Search, Filter, Add Button */}
+          {/* ✅ Increased gap-4 to gap-6 for more space */}
+          <div className="flex flex-col md:flex-row gap-6 w-full md:w-auto items-center">
+            
+            {/* Search */}
+            <div className="relative w-full md:w-64">
+              <img src={SearchIcon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-50" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                className="w-full bg-gray-50 border border-gray-300 rounded pl-10 pr-3 py-2 focus:outline-none focus:border-[#7EC1B1]"
+              />
+            </div>
+
+            {/* Category Filter */}
             <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className= "bg-gray-100 p-1 md:p-2 border rounded w-full md:w-[150px] text-sm md:text-base"
+              value={categoryFilter}
+              onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
+              className="bg-gray-50 border border-gray-300 rounded px-3 py-2 w-full md:w-48 focus:outline-none focus:border-[#7EC1B1]"
             >
-              <option value="">Select Category</option>
+              <option value="">All Categories</option>
               <option value="Spare Parts">Spare Parts</option>
               <option value="Water Purifier">Water Purifier</option>
-              <option value="Water Softner">Water Softner</option>
+              <option value="Water Softener">Water Softener</option>
               <option value="RO Plant">RO Plant</option>
               <option value="Water Ionizer">Water Ionizer</option>
             </select>
+
+            {/* Add Product Button */}
+            <button 
+                onClick={() => navigate('/product/add-product')} 
+                className="bg-[#7EC1B1] text-white px-6 py-2 rounded-lg font-medium shadow-sm hover:bg-[#6db0a0] flex items-center gap-2 whitespace-nowrap w-full md:w-auto justify-center"
+            >
+                 Add Product
+            </button>
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="table-auto w-full min-w-[600px] border border-gray-[#CACACA] md:min-w-full">
-            <thead className="hidden md:table-header-group">
-              <tr className="bg-[#F5F5F5] text-center text-sm md:text-lg">
-                <th className="h-[50px] md:h-[80px] font-poppins font-medium">Sr. No.</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">Category</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">Product Name</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">Price</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">Warranty</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">Discount</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">Status</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">Action</th>
+        <div className="overflow-x-auto rounded-t-lg border border-gray-200">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-[#F5F5F5] text-gray-700">
+              <tr>
+                <th className="p-3 font-semibold text-center w-16">Sr.No.</th>
+                <th className="p-3 font-semibold">Category</th>
+                <th className="p-3 font-semibold w-1/4">Product Name</th>
+                <th className="p-3 font-semibold text-center">Price</th>
+                <th className="p-3 font-semibold text-center">Warranty</th>
+                <th className="p-3 font-semibold text-center">Discount</th>
+                <th className="p-3 font-semibold text-center">Status</th>
+                <th className="p-3 font-semibold text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="text-center text-sm md:text-base">
-              {paginatedRows.map((row) => (
-                <tr key={row.id} className="bg-white text-black block sm:table-row mb-4 md:mb-0 p-2 md:p-0 rounded-lg shadow md:shadow-none">
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Sr. No.: </span>{row.id}
-                  </td>
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Category: </span>{row.category}
-                  </td>
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center max-w-full sm:truncate md:max-w-[200px]" title={row.product}>
-                    <span className="md:hidden font-semibold">Product: </span>{row.product}
-                  </td>
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Price: </span>{row.price}
-                  </td>
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Warranty: </span>{row.warranty}
-                  </td>
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Discount: </span>{row.discount}
-                  </td>
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Status: </span>
-                    <span className={row.status === "Approved" ? "text-[#34C759]" : row.status === "Pending" ? "text-[#FFCC00]" : "text-[#FF383C]"}>
-                      {row.status}
-                    </span>
-                  </td>
-                  <td className="p-2 md:p-3 flex gap-2 justify-start md:justify-center flex-wrap">
-                    <span className="md:hidden font-semibold">Action: </span>
-                    <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] p-1 md:p-2 rounded">
-                      <img
-                        src={PreviewIcon}
-                        alt="Preview"
-                        className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
-                        onClick={() => navigate("/product/product-details", { state: row })}
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
+            <tbody className="text-gray-600 text-sm">
+              {loading ? (
+                <tr><td colSpan="8" className="p-8 text-center">Loading Data...</td></tr>
+              ) : products.length > 0 ? (
+                products.map((row, index) => (
+                  <tr key={row._id || index} className="border-b hover:bg-gray-50 transition-colors">
+                    <td className="p-3 text-center font-medium">{(pagination.page - 1) * pagination.limit + index + 1}</td>
+                    <td className="p-3">{row.category}</td>
+                    <td className="p-3 font-medium text-gray-900" title={row.name}>
+                        {row.name.length > 40 ? row.name.substring(0, 40) + '...' : row.name}
+                    </td>
+                    <td className="p-3 text-center font-medium">₹{row.discountedPrice || row.price}</td>
+                    <td className="p-3 text-center">{row.warrantyPeriod} Years</td>
+                    <td className="p-3 text-center">{row.discountPercent}%</td>
+                    <td className={`p-3 text-center font-semibold capitalize ${getStatusColor(row.status)}`}>
+                        {row.status || 'Pending'}
+                    </td>
+                    <td className="p-3 text-center">
+                        <div className="flex justify-center items-center gap-3">
+                            <button 
+                                onClick={() => navigate(`/product/product-details/${row._id}`, { state: row })}
+                                className="p-1 hover:bg-blue-50 rounded" title="View"
+                            >
+                                <img src={PreviewIcon} alt="View" className="w-5 h-5 text-blue-500" />
+                            </button>
+                            <button 
+                                onClick={() => navigate(`/product/edit-product/${row._id}`)} 
+                                className="p-1 hover:bg-blue-50 rounded text-blue-500" title="Edit"
+                            >
+                                <Edit className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => handleDelete(row._id || row.id)} className="p-1 hover:bg-red-50 rounded text-red-500" title="Delete">
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan="8" className="p-8 text-center">No products found matching your criteria.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-2 flex-wrap font-semibold text-gray-700 text-sm md:text-base">
-          <span>
-            Showing {Math.min((page - 1) * rowsPerPage + 1, filteredRows.length)} to {Math.min(page * rowsPerPage, filteredRows.length)} of {filteredRows.length} entries
-          </span>
-          <div className="flex flex-wrap gap-2 text-[#7EC1B1] justify-center">
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-              className="px-3 py-1 md:px-4 md:py-2 border border-[#7EC1B1] rounded-lg"
-            >
-              Previous
-            </button>
-            {[...Array(totalPages)].map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => handlePageChange(idx + 1)}
-                className={`p-1 md:p-2 border rounded-lg border-[#7EC1B1] ${page === idx + 1 ? "bg-[#7EC1B1] text-white" : ""} w-[30px] md:w-[36px]`}
-              >
-                {idx + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
-              className="px-3 py-1 md:px-4 md:py-2 border border-[#7EC1B1] rounded-lg"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+        {/* Pagination Footer */}
+        {pagination.pages > 1 && (
+            <div className="flex flex-col sm:flex-row justify-between items-center mt-4 text-gray-600 text-sm">
+                <div>
+                    Showing {Math.min((page - 1) * rowsPerPage + 1, pagination.total)} to {Math.min(page * rowsPerPage, pagination.total)} of {pagination.total} Entries
+                </div>
+                <div className="flex gap-2 mt-2 sm:mt-0">
+                    <button 
+                        onClick={() => handlePageChange(page - 1)} 
+                        disabled={page === 1}
+                        className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50"
+                    >
+                        Previous
+                    </button>
+                    {[...Array(Math.min(5, pagination.pages))].map((_, i) => {
+                        const pNum = i + 1; 
+                        return (
+                            <button 
+                                key={pNum} 
+                                onClick={() => handlePageChange(pNum)}
+                                className={`px-3 py-1 border rounded ${page === pNum ? 'bg-[#7EC1B1] text-white border-[#7EC1B1]' : 'hover:bg-gray-100'}`}
+                            >
+                                {pNum}
+                            </button>
+                        )
+                    })}
+                    <button 
+                        onClick={() => handlePageChange(page + 1)} 
+                        disabled={page === pagination.pages}
+                        className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50"
+                    >
+                        Next
+                    </button>
+                </div>
+            </div>
+        )}
+
       </div>
     </div>
   );
 };
 
 export default Product;
-
-

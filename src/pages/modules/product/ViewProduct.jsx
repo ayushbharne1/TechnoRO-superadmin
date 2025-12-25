@@ -1,97 +1,163 @@
-
-import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { 
+  fetchProductDetails, 
+  updateProductStatus, 
+  clearSelectedProduct, 
+  clearSuccessMessage, 
+  clearProductError 
+} from "../../../redux/slices/productSlice"; 
 import Header2 from "../../../components/superAdmin/header/Header2";
-import sampleImage from "../../../assets/sample img.jpg";
+import { Loader2, ArrowLeft } from "lucide-react";
+import { toast } from "react-toastify";
+import sampleImage from "../../../assets/sample img.jpg"; 
 
 const ViewProduct = () => {
-  const location = useLocation();
+  const { productid } = useParams();
   const navigate = useNavigate();
-  const product = location.state;
+  const location = useLocation();
+  const dispatch = useDispatch();
 
-  if (!product) {
-    return (
-      <div className="p-6 text-center">
-        <h2 className="text-2xl font-semibold">No product data found.</h2>
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
-        >
-          Go Back
-        </button>
-      </div>
-    );
-  }
+  const { selectedProduct, loading, error, successMessage } = useSelector((state) => state.products);
+  
+  // Use Passed State or Redux Data
+  const product = selectedProduct || location.state;
+
+  // Fetch if missing or ID changed
+  useEffect(() => {
+    if (productid) {
+        dispatch(fetchProductDetails(productid));
+    }
+    return () => { dispatch(clearSelectedProduct()); };
+  }, [dispatch, productid]);
+
+  // Handle Toasts
+  useEffect(() => {
+    if (successMessage) {
+        toast.success(successMessage);
+        dispatch(clearSuccessMessage());
+        // Refresh data to show new status
+        if(productid) dispatch(fetchProductDetails(productid));
+    }
+    if (error) {
+        toast.error(error);
+        dispatch(clearProductError());
+    }
+  }, [successMessage, error, dispatch, productid]);
+
+  const handleAction = (actionName) => {
+    if (!product?._id) return toast.error("Invalid Product ID");
+    dispatch(updateProductStatus({ id: product._id, action: actionName }));
+  };
+
+  // UI States
+  if (loading && !product) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin w-10 h-10 text-[#7EC1B1]"/></div>;
+  if (!product) return <div className="p-8 text-center">Product Not Found <button onClick={() => navigate(-1)} className="text-blue-500 ml-2">Go Back</button></div>;
+
+  const mainImage = (product.images && product.images.length > 0) ? product.images[0] : sampleImage;
+  const status = product.status?.toLowerCase() || 'pending';
 
   return (
     <div className="bg-gray-100 min-h-screen p-4 md:p-6">
       <Header2 />
-      <div className="bg-white rounded-xl font-poppins shadow-md p-4 md:p-8 max-w-6xl mx-auto mt-6">
-        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
-          {/* Product Image */}
-          <div className="relative w-full md:w-1/3 flex justify-center md:justify-start">
-            <div className="absolute  bg-[#008ECC] text-white px-4 py-6 md:px-4 md:py-3 rounded text-lg md:text-lg font-semibold">
-              {product.discount} OFF
-            </div>
-            <img
-              src={sampleImage}
-              alt={product.product}
-              className="rounded-lg w-full max-w-[300px] md:max-w-none md:h-[400px] md:w-[400px] object-cover"
-            />
+      <div className="max-w-6xl mx-auto mt-6">
+        <button onClick={() => navigate(-1)} className="flex items-center text-gray-500 hover:text-black mb-4">
+          <ArrowLeft className="w-5 h-5 mr-1" /> Back
+        </button>
+
+        <div className="bg-white rounded-xl shadow-md p-6 md:p-8 flex flex-col md:flex-row gap-8">
+          
+          {/* IMAGE */}
+          <div className="w-full md:w-1/3 relative flex justify-center">
+             {product.discountPercent > 0 && (
+                <div className="absolute top-2 left-2 bg-[#008ECC] text-white px-3 py-1 rounded text-sm font-bold shadow-md z-10">
+                    {product.discountPercent}% OFF
+                </div>
+             )}
+             <div className="w-full h-[400px] border border-gray-100 rounded-lg overflow-hidden flex items-center justify-center bg-white">
+                <img 
+                    src={mainImage} 
+                    alt={product.name} 
+                    className="w-full h-full object-contain"
+                    onError={(e) => e.target.src = sampleImage} 
+                />
+             </div>
           </div>
 
-          {/* Product Details */}
-          <div className="flex-1 w-full">
-            <h2 className="text-lg md:text-xl font-poppins mb-2">{product.product}</h2>
-            <div className="flex flex-wrap items-center gap-1 md:gap-2 text-base md:text-lg font-semibold text-[#7EC1B1] mb-1">
-              {product.price}
-              <span className="text-gray-500 text-sm md:text-base font-normal">
-                • Warranty:{" "}
-                <span className="text-[#34C759] font-semibold">
-                  {product.warranty}
+          {/* DETAILS */}
+          <div className="flex-1">
+             <div className="flex justify-between items-start mb-2">
+                <h2 className="text-2xl font-bold text-gray-900">{product.name}</h2>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                    status === 'approved' ? 'bg-green-100 text-green-700' : 
+                    status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                }`}>
+                    {status}
                 </span>
-              </span>
-            </div>
-            <p className="text-gray-700 mb-4 text-sm md:text-base">
-              Product Add by:{" "}
-              <span className="font-semibold text-black">KENT PVT. LTD.</span>
-            </p>
+             </div>
+             <p className="text-gray-500 text-sm mb-4">{product.category} | {product.brand}</p>
 
-            <h3 className="text-base md:text-lg font-semibold border-b border-gray-200 pb-2 mb-3">
-              Description
-            </h3>
+             <div className="flex items-center gap-4 mb-6">
+                <span className="text-3xl font-bold text-[#7EC1B1]">₹{product.discountedPrice || product.price}</span>
+                {product.discountedPrice < product.price && (
+                    <span className="text-gray-400 line-through text-lg">₹{product.price}</span>
+                )}
+                <div className="bg-gray-100 px-3 py-1 rounded text-sm font-medium text-gray-600">
+                    Warranty: <span className="text-[#34C759]">{product.warrantyPeriod} Years</span>
+                </div>
+             </div>
 
-            <ul className="text-gray-600 list-disc ml-5 space-y-2 text-sm md:text-base">
-              <li>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet,
-                tempora.lorem ipsum dolor sit amet consectetur adipisicing elit. Amet, tempora. 
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Illum autem excepturi nostrum atque natus mollitia vel recusandae 
-                libero fugiat, impedit nisi eaque molestiae, sapiente explicabo dicta quo delectus
-              </li>
-              <li>
-                Varius sed maecenas donec lobortis eu ornare arcu fermentum. Lorem ipsum, dolor sit amet 
-                consectetur adipisicing elit. 
-                Mollitia facere itaque, iste est eius ut nihil recusandae laboriosam ipsa quaerat nulla quidem, 
-                nam molestiae veniam odit sunt perferendis voluptatum tempora. Lorem ipsum, 
-                dolor sit amet consectetur a
-              </li>
-              <li>
-                Facilisis nunc in scelerisque aenean dolor felis in odio. Lorem, ipsum dolor sit amet 
-                consectetur adipisicing elit. Iste aliquam dolor temporibus, doloribus aliquid non 
-                exercitationem aut impedit voluptate est ea libero ratione unde nihil quidem quod nisi 
-                dolores sit.
-              </li>
-            </ul>
+             <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="p-3 bg-gray-50 rounded">
+                    <p className="text-xs text-gray-500">Added By</p>
+                    <p className="font-semibold text-gray-900">{product.addedBy?.name || 'Unknown'}</p>
+                    <p className="text-xs text-gray-400">{product.addedByModel}</p>
+                </div>
+                <div className="p-3 bg-gray-50 rounded">
+                    <p className="text-xs text-gray-500">Stock</p>
+                    <p className={`font-semibold ${product.stockStatus === 'In Stock' ? 'text-green-600' : 'text-red-500'}`}>
+                        {product.stockStatus || (product.stock > 0 ? 'In Stock' : 'Out of Stock')}
+                    </p>
+                    <p className="text-xs text-gray-400">{product.stock} units</p>
+                </div>
+             </div>
 
-            {/* Buttons */}
-            <div className="flex flex-wrap gap-3 md:gap-4 mt-6 md:mt-8">
-              <button className="px-15 py-2 rounded-md font-semibold text-white bg-[#C17E7F] text-sm md:text-base">
-                Reject
-              </button>
-              <button className="px-15 py-2 rounded-md font-semibold text-white bg-[#3A953A] text-sm md:text-base">
-                Approve
-              </button>
-            </div>
+             <div className="mb-6">
+                <h3 className="font-semibold border-b pb-2 mb-2 text-gray-800">Description</h3>
+                <p className="text-gray-600 text-sm whitespace-pre-line leading-relaxed">
+                    {product.description || "No description available."}
+                </p>
+             </div>
+
+             {product.offers && product.offers.length > 0 && (
+                <div className="mb-8">
+                    <h3 className="font-semibold border-b pb-2 mb-2 text-gray-800">Offers</h3>
+                    <ul className="list-disc ml-5 text-gray-600 text-sm">
+                        {product.offers.map((offer, idx) => <li key={idx}>{offer}</li>)}
+                    </ul>
+                </div>
+             )}
+
+             {/* BUTTONS */}
+             {status === 'pending' && (
+                 <div className="flex gap-4 pt-4 border-t">
+                    <button 
+                        onClick={() => handleAction('reject')} 
+                        disabled={loading}
+                        className="flex-1 bg-[#C17E7F] hover:bg-[#a36263] text-white py-3 rounded-lg font-bold transition shadow-sm disabled:opacity-50"
+                    >
+                        {loading ? 'Processing...' : 'Reject'}
+                    </button>
+                    <button 
+                        onClick={() => handleAction('accept')} 
+                        disabled={loading}
+                        className="flex-1 bg-[#3A953A] hover:bg-[#2e7d2e] text-white py-3 rounded-lg font-bold transition shadow-sm disabled:opacity-50"
+                    >
+                        {loading ? 'Processing...' : 'Approve'}
+                    </button>
+                 </div>
+             )}
           </div>
         </div>
       </div>

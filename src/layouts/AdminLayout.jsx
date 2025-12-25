@@ -30,6 +30,9 @@ import Product from "../pages/modules/product/Product";
 
 import ViewProduct from "../pages/modules/product/ViewProduct";
 
+import AddProduct from "../pages/modules/product/AddProduct";     // ✅ Import this
+import UpdateProduct from "../pages/modules/product/UpdateProduct"; // ✅ Import this
+
 // --- TIME SLOT ---
 import TimeSlotAndDate from "../pages/modules/timeSlotAndDate/TimeSlotAndDate";
 import AddTimeSlot from "../components/superAdmin/pages/AddTimeSlot";
@@ -116,27 +119,10 @@ import StartNewChat from "../pages/modules/Message/StartNewChat";
 import ChatPage from "../pages/modules/Message/ChatPage";
 
 import PopularCities from "../pages/modules/PopularCities/Popularcities";
-import AddCity from "../pages/modules/PopularCities/AddCity";
+import AddCity from "../pages/modules/PopularCities/AddCity"; 
 import EditCity from "../pages/modules/PopularCities/EditCity";
 
-// sm
-import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-// 
-
 const AdminLayout = () => {
-
-  // sm authentication needed
-  const isAuthenticated = useSelector(
-    (state) => state.adminAuth.isAuthenticated
-  );
-
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-  // 
-
-
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
@@ -148,7 +134,6 @@ const AdminLayout = () => {
   if (loading) {
     return <LoadingPage />;
   }
-
 
   // Hide sidebar and header on login and signup
   const isAuthPage = ["/", "/signup"].includes(location.pathname);
@@ -198,18 +183,12 @@ const AdminLayout = () => {
               {/* PRODUCT */}
               <Route path="/product" element={<Product />} />
 
-              <Route
-                path="/product/product-details"
-                element={<ViewProduct />}
-              />
+              <Route path="/product/product-details" element={<ViewProduct />} />
+              
+              <Route path="/product/product-details/:productid" element={<ViewProduct />} />
 
-              {/* PRODUCT */}
-              <Route path="/product" element={<Product />} />
-              {/* <Route path="/product/addproduct" element={<AddProduct />} /> */}
-              <Route
-                path="/product/product-details"
-                element={<ViewProduct />}
-              />
+              <Route path="/product/add-product" element={<AddProduct />} />
+              <Route path="/product/edit-product/:productid" element={<UpdateProduct />} />
 
               {/* TIME SLOT */}
               <Route path="/time-slot" element={<TimeSlotAndDate />} />
@@ -284,7 +263,7 @@ const AdminLayout = () => {
               <Route path="/vendors" element={<Vendor />} />
               <Route path="/vendors/addvendor" element={<AddVendor />} />
               <Route path="/vendors/editvendor/:id" element={<EditVendor />} />
-              <Route path="/vendors/viewvendor/:id" element={<ViewVendor />} />
+              <Route path="/vendors/details/:id" element={<ViewVendor />} />
 
               {/* SERVICE ENGINEER */}
               <Route path="/service-engineer" element={<Engineer />} />
@@ -347,11 +326,11 @@ const AdminLayout = () => {
 
               <Route path="/notifications" element={<Notification />} />
 
-
-              <Route path="/popular-cities" element={<PopularCities />} />
+        
+              <Route path="/popular-cities" element={<PopularCities />} />    
               <Route path="/popular-cities/add-new-city" element={<AddCity />} />
               <Route path="/popular-cities/edit-city/:id" element={<EditCity />} />
-
+                    
             </Routes>
           </ResponsiveLayout>
         </main>
