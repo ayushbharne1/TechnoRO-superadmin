@@ -6,6 +6,7 @@ import vendorReducer from "./slices/vendorSlice";
 import serviceEngineerReducer from "../redux/slices/serviceEngineerSlice" 
 import serviceReducer from "./slices/serviceSlice";
 import productReducer from './slices/productSlice'; 
+import adminProfileReducer from "../redux/slices/adminProfileSlice";
 export const store = configureStore({
   reducer: {
     // auth: authReducer,
@@ -16,6 +17,7 @@ export const store = configureStore({
     serviceEngineer: serviceEngineerReducer,
     service: serviceReducer,
     products: productReducer,
+    adminProfile: adminProfileReducer,
   },
   devTools: import.meta.env.MODE !== "production",
 });

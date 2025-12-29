@@ -67,27 +67,23 @@ const Product = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-2 md:p-4 h-full overflow-y-auto flex flex-col gap-2">
-      <Header2 />
+    <div className="bg-white p-2 md:p-4 h-full overflow-y-auto flex flex-col gap-2 mt-2 ml-2">
+      <Header2 title="Product List"/>
 
       {/* Table Container */}
-      <div className="bg-white p-3 md:p-4 w-full rounded-lg shadow overflow-x-auto">
+      <div className="bg-white p-3 md:p-4 md:pl-0 w-full overflow-x-auto">
         
-        {/* Title */}
-        <div className="mb-4 px-2">
-            <h2 className="text-xl font-bold text-gray-800">Product List</h2>
-        </div>
 
         {/* Controls Row */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 px-2">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 pl-0 pr-2">
           
           {/* Left: Show Entries */}
-          <div className="flex items-center gap-3 text-gray-700 font-medium">
+          <div className="flex items-center gap-3 text-gray-700 font-normal">
             <span>Show</span>
             <select
               value={rowsPerPage}
               onChange={handleRowsPerPage}
-              className="bg-gray-50 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-[#7EC1B1]"
+              className="bg-gray-100 border border-black rounded px-2 py-1 focus:outline-none focus:border-[#7EC1B1]"
             >
               {[7, 10, 20, 50].map(num => <option key={num} value={num}>{num}</option>)}
             </select>
@@ -96,17 +92,17 @@ const Product = () => {
 
           {/* Right: Search, Filter, Add Button */}
           {/* ✅ Increased gap-4 to gap-6 for more space */}
-          <div className="flex flex-col md:flex-row gap-6 w-full md:w-auto items-center">
+          <div className="flex flex-col md:flex-row gap-14 w-full md:w-auto items-center">
             
             {/* Search */}
-            <div className="relative w-full md:w-64">
+            <div className="relative w-full md:w-50">
               <img src={SearchIcon} alt="" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-50" />
               <input
                 type="text"
                 placeholder="Search..."
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="w-full bg-gray-50 border border-gray-300 rounded pl-10 pr-3 py-2 focus:outline-none focus:border-[#7EC1B1]"
+                className="w-full bg-gray-100 border border-black rounded pl-10 pr-3 py-1 focus:outline-none focus:border-[#7EC1B1]"
               />
             </div>
 
@@ -114,9 +110,9 @@ const Product = () => {
             <select
               value={categoryFilter}
               onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
-              className="bg-gray-50 border border-gray-300 rounded px-3 py-2 w-full md:w-48 focus:outline-none focus:border-[#7EC1B1]"
+              className="bg-gray-100 border border-black rounded px-3 py-1 w-full md:w-48 focus:outline-none focus:border-[#7EC1B1]"
             >
-              <option value="">All Categories</option>
+              <option value="">Select Category</option>
               <option value="Spare Parts">Spare Parts</option>
               <option value="Water Purifier">Water Purifier</option>
               <option value="Water Softener">Water Softener</option>
@@ -127,7 +123,7 @@ const Product = () => {
             {/* Add Product Button */}
             <button 
                 onClick={() => navigate('/product/add-product')} 
-                className="bg-[#7EC1B1] text-white px-6 py-2 rounded-lg font-medium shadow-sm hover:bg-[#6db0a0] flex items-center gap-2 whitespace-nowrap w-full md:w-auto justify-center"
+                className="bg-[#7EC1B1] text-white px-6 py-1 rounded-lg font-medium shadow-sm hover:bg-[#6db0a0] flex items-center gap-2 whitespace-nowrap w-full md:w-auto justify-center"
             >
                  Add Product
             </button>
@@ -135,7 +131,7 @@ const Product = () => {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto rounded-t-lg border border-gray-200">
+        <div className="overflow-x-auto border border-gray-200">
           <table className="w-full text-left border-collapse">
             <thead className="bg-[#F5F5F5] text-gray-700">
               <tr>
@@ -157,13 +153,13 @@ const Product = () => {
                   <tr key={row._id || index} className="border-b hover:bg-gray-50 transition-colors">
                     <td className="p-3 text-center font-medium">{(pagination.page - 1) * pagination.limit + index + 1}</td>
                     <td className="p-3">{row.category}</td>
-                    <td className="p-3 font-medium text-gray-900" title={row.name}>
+                    <td className="p-3" title={row.name}>
                         {row.name.length > 40 ? row.name.substring(0, 40) + '...' : row.name}
                     </td>
                     <td className="p-3 text-center font-medium">₹{row.discountedPrice || row.price}</td>
                     <td className="p-3 text-center">{row.warrantyPeriod} Years</td>
                     <td className="p-3 text-center">{row.discountPercent}%</td>
-                    <td className={`p-3 text-center font-semibold capitalize ${getStatusColor(row.status)}`}>
+                    <td className={`p-3 text-center  ${getStatusColor(row.status)}`}>
                         {row.status || 'Pending'}
                     </td>
                     <td className="p-3 text-center">
