@@ -163,7 +163,7 @@ useEffect(() => {
 //   return (
 //     <div className="flex flex-col md:flex-row gap-6 mt-6">
 //       {charts.map((chart) => (
-//         <PieCard key={chart.title} {...chart} />
+//         <n key={chart.title} {...chart} />
 //       ))}
 //     </div>
 //   );

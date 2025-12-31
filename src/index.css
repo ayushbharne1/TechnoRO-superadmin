@@ -4,6 +4,8 @@
 
 @import "tailwindcss";
 
+
+
 body {
   font-family: 'Poppins', sans-serif;
 }
@@ -64,5 +66,40 @@ html, body {
   display: none;           /* Chrome, Safari, Opera */
 }
 
+/* ===== JODIT LIST FIX (CLEAN & CORRECT) ===== */
 
+.jodit-wysiwyg ul,
+.jodit-wysiwyg ol {
+  padding-left: 1.5rem !important;
+  margin: 0.5rem 0 !important;
+}
 
+/* Level 1 */
+.jodit-wysiwyg ul {
+  list-style-type: disc;
+}
+
+/* Level 2 */
+.jodit-wysiwyg ul ul {
+  list-style-type: circle;
+}
+
+/* Level 3 */
+.jodit-wysiwyg ul ul ul {
+  list-style-type: square;
+}
+
+/* Ordered lists */
+.jodit-wysiwyg ol {
+  list-style-type: decimal;
+}
+
+.jodit-wysiwyg ol ol {
+  list-style-type: lower-alpha;
+}
+
+.jodit-wysiwyg li {
+  display: list-item !important;
+  line-height: 1.6;
+  margin: 0.25rem 0;
+}
