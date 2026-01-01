@@ -7,7 +7,6 @@ import {
   MapPin, Phone, Calendar, Info, Wrench, FileText, UserCheck, Loader2, CheckCircle 
 } from "lucide-react";
 
-// ✅ 1. IMPORT THE COMPONENT
 import LeadTimeline from "./LeadTimeline"; 
 
 const ViewLead = () => {
