@@ -1,147 +1,101 @@
-
-
-
-// import { motion } from "framer-motion";
-
-// const LeadTimeline = () => {
-//   const steps = [
-//     {
-//       title: "Service Registered Confirmed",
-//       description: "Booking received successfully",
-//       date: "Wed, 1 Oct | 10:30 AM",
-//     },
-//     {
-//       title: "Assigned To Service Engineer",
-//       description: "John Doe",
-//       date: "Thu, 2 Oct | 12:00 PM",
-//     },
-//     {
-//       title: "Service OTP Received",
-//       description: "OTP: 4567",
-//       date: "Thu, 2 Oct | 01:45 PM",
-//     },
-//     {
-//       title: "Order Summary",
-//       description: "Product: Water Purifier",
-//       date: "Thu, 2 Oct | 03:15 PM",
-//     },
-//   ];
-
-//   return (
-//     <div className="w-1/2 bg-white p-6 rounded-lg shadow-md mt-6 relative overflow-hidden ml-0">
-//       {/* wrapper for line + steps */}
-//       <div className="relative">
-//         {/* Vertical line placed at center of left column (left column = w-10) */}
-//         <motion.div
-//           className="absolute left-10 top-6 bottom-6 w-[3px] bg-green-500 rounded"
-//           initial={{ height: 0 }}
-//           animate={{ height: "90%" }}
-//           transition={{ duration: 1.0, ease: "easeInOut" }}
-//         />
-
-//         <div className="flex flex-col gap-10 relative">
-//           {steps.map((step, index) => (
-//             <motion.div
-//               key={index}
-//               className="flex items-start"
-//               initial={{ opacity: 0, x: -10 }}
-//               animate={{ opacity: 1, x: 0 }}
-//               transition={{ duration: 0.45, delay: index * 0.25 }}
-//             >
-//               {/* Left column: fixed width for dot (centers on the line) */}
-//               <div className="w-21 flex justify-center">
-//                 <motion.span
-//                   className="w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow"
-//                   initial={{ scale: 0 }}
-//                   animate={{ scale: 1 }}
-//                   transition={{ duration: 0.35, delay: index * 0.25 }}
-//                 />
-//               </div>
-
-//               {/* Right column: content */}
-//               <div className="flex-1 bg-white p-4 rounded-md shadow-sm ml-2">
-//                 <h3 className="text-lg font-semibold text-gray-900">{step.title}</h3>
-//                 <p className="text-gray-600 text-sm">{step.description}</p>
-//                 <p className="text-gray-400 text-xs mt-1">{step.date}</p>
-//               </div>
-//             </motion.div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default LeadTimeline;
-
-
-
-
+import React from "react";
 import { motion } from "framer-motion";
 
-const LeadTimeline = () => {
-  const steps = [
+const LeadTimeline = ({ lead }) => {
+  // 1. Safety check
+  if (!lead) return null;
+
+  // 2. Helper to format date
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
+    });
+  };
+
+  // 3. Define Real World Steps
+  const rawSteps = [
     {
+      id: "registered",
       title: "Service Registered Confirmed",
-      description: "Booking received successfully",
-      date: "Wed, 1 Oct | 10:30 AM",
+      description: lead.remarks || "Service registered successfully.",
+      date: formatDate(lead.createdAt),
+      isCompleted: true, // Always true if lead exists
     },
     {
+      id: "assigned",
       title: "Assigned To Service Engineer",
-      description: "John Doe",
-      date: "Thu, 2 Oct | 12:00 PM",
+      description: lead.assignedVendorId ? `Assigned to ${lead.assignedVendorId.name}` : "Pending Assignment",
+      date: lead.assignedVendorId ? "Confirmed" : "-",
+      isCompleted: !!lead.assignedVendorId, // True if vendor exists
     },
     {
-      title: "Service OTP Received",
-      description: "OTP: 4567",
-      date: "Thu, 2 Oct | 01:45 PM",
-    },
-    {
-      title: "Order Summary",
-      description: "Product: Water Purifier",
-      date: "Thu, 2 Oct | 03:15 PM",
-    },
-    {
-      title: "Case Closed",
-    
+      id: "completed",
+      title: "Job Completed",
+      description: lead.status?.toLowerCase() === 'completed' ? "Service successfully done" : "Pending completion",
+      date: lead.status?.toLowerCase() === 'completed' ? formatDate(lead.updatedAt) : "-",
+      isCompleted: lead.status?.toLowerCase() === 'completed',
     },
   ];
 
+  // Filter steps: Only show "Job Completed" if it is actually completed (to match your screenshot logic)
+  // or you can show it as grayed out. Here I follow your screenshot logic:
+  const steps = lead.status?.toLowerCase() === 'completed' 
+    ? rawSteps 
+    : rawSteps.filter(s => s.id !== 'completed');
+
   return (
-    <div className="w-1/2 bg-white p-6 rounded-lg shadow-md mt-6 relative overflow-hidden ml-0">
-      <div className="relative flex flex-col gap-10">
-        {/* Vertical line: span entire dot container */}
+    // Matches the container style from ViewLead.jsx
+    <div className=" border border-gray-200  p-6 relative overflow-hidden">
+      <div className="relative flex flex-col gap-8">
+        
+        {/* Vertical Green Line */}
+        {/* Adjusted to left-[7px] relative to the flex container to center with dots */}
         <motion.div
-          className="absolute left-5 top-1/2 transform -translate-y-1/2 w-[3px] bg-green-500 rounded"
-          style={{ height: `calc(100% - 2.5rem)` }} 
+          className="absolute left-[7px] top-2 bottom-4 w-1 bg-[#4CAF50] z-0"
           initial={{ height: 0 }}
-          animate={{ height: `calc(100% - 2.5rem)` }}
+          animate={{ height: "100%" }} 
           transition={{ duration: 1.0, ease: "easeInOut" }}
         />
 
         {steps.map((step, index) => (
           <motion.div
             key={index}
-            className="flex items-start relative"
+            className="flex items-start relative z-10"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.45, delay: index * 0.25 }}
+            transition={{ duration: 0.4, delay: index * 0.2 }}
           >
-            {/* Left column: dot aligned with line */}
-            <div className="w-10 flex justify-center relative">
-              <motion.span
-                className="w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow"
+            {/* Left Column: Dot */}
+            <div className="flex flex-col items-center pt-1 mr-4">
+              <motion.div
+                // Matches your screenshot: Solid green, no border
+                className="w-4 h-4 rounded-full bg-[#4CAF50] shadow-sm"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ duration: 0.35, delay: index * 0.25 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20, delay: index * 0.2 }}
               />
             </div>
 
-            {/* Right column: content */}
-            <div className="flex-1 bg-white p-4 rounded-md shadow-sm ml-4">
-              <h3 className="text-lg font-semibold text-gray-900">{step.title}</h3>
-              <p className="text-gray-600 text-sm">{step.description}</p>
-              <p className="text-gray-400 text-xs mt-1">{step.date}</p>
+            {/* Right Column: Content */}
+            <div className="flex-1">
+                <h4 className="text-gray-900 font-bold text-base">
+                  {step.title}
+                </h4>
+                
+                {/* Description */}
+                {step.description && step.description !== "Pending Assignment" && step.description !== "Pending completion" && (
+                  <p className={`text-sm mt-1 ${step.id === 'completed' ? 'text-green-600 font-medium' : 'text-gray-600'}`}>
+                    {step.description}
+                  </p>
+                )}
+                
+                {/* Date */}
+                {step.date && step.date !== "-" && step.date !== "Confirmed" && (
+                  <p className="text-gray-400 text-xs mt-2">
+                    {step.date}
+                  </p>
+                )}
             </div>
           </motion.div>
         ))}
