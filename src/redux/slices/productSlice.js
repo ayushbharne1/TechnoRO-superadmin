@@ -40,6 +40,7 @@ export const updateProductStatus = createAsyncThunk(
     try {
       // action must be "accept" or "reject"
       const response = await axiosInstance.patch(`/api/admin/product/${id}`, { action });
+      console.log("UPDATE STATUS RESPONSE:", response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.response?.data?.error || 'Update failed');

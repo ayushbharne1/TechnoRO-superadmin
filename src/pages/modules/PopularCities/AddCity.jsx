@@ -231,8 +231,8 @@ const AddCity = () => {
         </div>
 
         <Faq />
-        {/* <ReviewManager /> */}
-        {/* <RecentlyServedManager /> */}
+        <ReviewManager />
+        <RecentlyServedManager />
         <StoreLocationManager />
         {/* Add Button */}
         <div className="flex justify-center w-full mt-6">
