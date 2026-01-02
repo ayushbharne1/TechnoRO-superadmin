@@ -1,9 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;
+const BASE_URL = "https://ro-service-engineer-be.onrender.com/api/admin";
+
 const getAuthConfig = () => {
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("adminToken"); 
   return {
     headers: { Authorization: `Bearer ${token}` },
   };

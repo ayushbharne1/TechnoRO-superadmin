@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux"; 
 import { createProduct, clearSuccessMessage, clearProductError } from "../../../redux/slices/productSlice"; 
 import Header2 from "../../../components/superAdmin/header/Header2";
-import { Trash2, Upload, Loader2, ArrowLeft } from "lucide-react";
+import { Trash2, Upload, Loader2, Plus, X } from "lucide-react";
 import { toast } from "react-toastify";
 
 const AddProduct = () => {
@@ -27,6 +27,7 @@ const AddProduct = () => {
 
   const [images, setImages] = useState([]); 
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [offers, setOffers] = useState([""]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,6 +51,23 @@ const AddProduct = () => {
     setImagePreviews(newPreviews);
   };
 
+  const handleOfferChange = (index, value) => {
+    const newOffers = [...offers];
+    newOffers[index] = value;
+    setOffers(newOffers);
+  };
+
+  const addOffer = () => {
+    setOffers([...offers, ""]);
+  };
+
+  const removeOffer = (index) => {
+    if (offers.length > 1) {
+      const newOffers = offers.filter((_, i) => i !== index);
+      setOffers(newOffers);
+    }
+  };
+
   useEffect(() => {
     if (successMessage) {
         toast.success(successMessage);
@@ -62,7 +80,7 @@ const AddProduct = () => {
     }
   }, [successMessage, error, dispatch, navigate]);
 
-  const handleSubmit = (e) => {
+const handleSubmit = (e) => {
     e.preventDefault();
 
     if (images.length === 0) return toast.error("Please upload at least one product image.");
@@ -90,6 +108,14 @@ const AddProduct = () => {
     if (formData.description) data.append("description", formData.description);
     if (formData.brand) data.append("brand", formData.brand);
 
+    // Add offers as array (filter out empty ones)
+    const validOffers = offers.filter(offer => offer.trim() !== "");
+    if (validOffers.length > 0) {
+      validOffers.forEach((offer) => {
+        data.append("offers[]", offer);
+      });
+    }
+
     images.forEach((image) => {
       data.append("images", image);
     });
@@ -110,11 +136,14 @@ const AddProduct = () => {
             {/* Row 1: Category & Name */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <label className="block text-base font-semibold text-gray-800 mb-2">Category</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">
+                        Category <span className="text-red-500">*</span>
+                    </label>
                     <select
                         name="category"
                         value={formData.category}
                         onChange={handleChange}
+                        required
                         className="w-full border border-black px-4 py-3 text-gray-600 focus:outline-none focus:border-[#7EC1B1] bg-gray-100"
                     >
                         <option value="">Select Category</option>
@@ -126,13 +155,16 @@ const AddProduct = () => {
                     </select>
                 </div>
                 <div>
-                    <label className="block text-base font-semibold text-gray-800 mb-2">Product Name</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">
+                        Product Name <span className="text-red-500">*</span>
+                    </label>
                     <input
                         type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="Enter Product Name"
+                        required
                         className="w-full border border-black px-4 py-3 text-gray-600 focus:outline-none focus:border-[#7EC1B1] bg-gray-100"
                     />
                 </div>
@@ -141,7 +173,9 @@ const AddProduct = () => {
             {/* Row 2: Price & Warranty */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <label className="block text-base font-semibold text-gray-800 mb-2">Price</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">
+                        Price <span className="text-red-500">*</span>
+                    </label>
                     <input
                         type="number"
                         name="price"
@@ -149,11 +183,12 @@ const AddProduct = () => {
                         onChange={handleChange}
                         placeholder="₹ Enter Price"
                         min="0"
+                        required
                         className="w-full border border-black px-4 py-3 text-gray-600 focus:outline-none focus:border-[#7EC1B1] bg-gray-100"
                     />
                 </div>
                 <div>
-                    <label className="block text-base font-semibold text-gray-800 mb-2">Warranty</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">Warranty (Years)</label>
                     <input
                         type="number"
                         name="warrantyPeriod"
@@ -182,7 +217,9 @@ const AddProduct = () => {
                     />
                 </div>
                 <div>
-                    <label className="block text-base font-semibold text-gray-800 mb-2">Stock Quantity</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">
+                        Stock Quantity <span className="text-red-500">*</span>
+                    </label>
                     <input
                         type="number"
                         name="stock"
@@ -190,6 +227,7 @@ const AddProduct = () => {
                         onChange={handleChange}
                         placeholder="Enter Stock"
                         min="0"
+                        required
                         className="w-full border border-black px-4 py-3 text-gray-600 focus:outline-none focus:border-[#7EC1B1] bg-gray-100"
                     />
                 </div>
@@ -198,24 +236,30 @@ const AddProduct = () => {
             {/* Row 4: Color & Material */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <label className="block text-base font-semibold text-gray-800 mb-2">Color</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">
+                        Color <span className="text-red-500">*</span>
+                    </label>
                     <input
                         type="text"
                         name="color"
                         value={formData.color}
                         onChange={handleChange}
                         placeholder="Enter Color"
+                        required
                         className="w-full border border-black px-4 py-3 text-gray-600 focus:outline-none focus:border-[#7EC1B1] bg-gray-100"
                     />
                 </div>
                 <div>
-                    <label className="block text-base font-semibold text-gray-800 mb-2">Material</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">
+                        Material <span className="text-red-500">*</span>
+                    </label>
                     <input
                         type="text"
                         name="material"
                         value={formData.material}
                         onChange={handleChange}
                         placeholder="Enter Material"
+                        required
                         className="w-full border border-black px-4 py-3 text-gray-600 focus:outline-none focus:border-[#7EC1B1] bg-gray-100"
                     />
                 </div>
@@ -247,20 +291,61 @@ const AddProduct = () => {
                 ></textarea>
             </div>
 
+            {/* Offers Section */}
+            <div>
+                <div className="flex items-center justify-between mb-3">
+                    <label className="block text-base font-semibold text-gray-800">Offers</label>
+                    <button
+                        type="button"
+                        onClick={addOffer}
+                        className="flex items-center gap-2 text-[#66BFA8] hover:text-[#56a892] font-medium text-sm transition"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Add Offer
+                    </button>
+                </div>
+                
+                <div className="space-y-3">
+                    {offers.map((offer, index) => (
+                        <div key={index} className="flex gap-3 items-center">
+                            <input
+                                type="text"
+                                value={offer}
+                                onChange={(e) => handleOfferChange(index, e.target.value)}
+                                placeholder={`Enter Offer ${index + 1}`}
+                                className="flex-1 border border-black px-4 py-3 text-gray-600 focus:outline-none focus:border-[#7EC1B1] bg-gray-100"
+                            />
+                            {offers.length > 1 && (
+                                <button
+                                    type="button"
+                                    onClick={() => removeOffer(index)}
+                                    className="p-2 text-red-500 hover:bg-red-50 rounded transition"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             {/* Image Upload */}
             <div>
-                <label className="block text-base font-semibold text-gray-800 mb-2 ">Product Image</label>
+                <label className="block text-base font-semibold text-gray-800 mb-2">
+                    Product Image <span className="text-red-500">*</span>
+                </label>
                 
-                <div className="border border-black p-6 flex flex-col items-center justify-center bg-gray-100 cursor-pointer relative mb-6 ">
+                <div className="border border-black p-6 flex flex-col items-center justify-center bg-gray-100 cursor-pointer relative mb-6">
                     <input
                         type="file"
                         multiple
                         accept="image/*"
                         onChange={handleImageChange}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer "
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        required
                     />
                     <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-500 ">Click to upload images</p>
+                    <p className="text-sm text-gray-500">Click to upload images (Max 5)</p>
                 </div>
 
                 {imagePreviews.length > 0 && (

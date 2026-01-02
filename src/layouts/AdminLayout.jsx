@@ -139,7 +139,7 @@ const AdminLayout = () => {
   const isAuthPage = ["/", "/signup"].includes(location.pathname);
 
   return (
-    <div className="flex h-screen w-full bg-gray-50">
+    <div className="flex h-screen w-full bg-gray-50 overflow-hidden w-[270px]">
       {/* Sidebar */}
       {!isAuthPage && (
         <div className="hidden md:flex flex-shrink-0">
@@ -147,14 +147,15 @@ const AdminLayout = () => {
         </div>
       )}
 
-      <div className="flex flex-col flex-1 h-screen">
+      <div className="flex flex-col flex-1 min-w-0 h-screen">
         {/* Header */}
         {!isAuthPage && <Header />}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto hide-scrollbar">
+        <main className="flex-1 overflow-auto bg-white">
           <ResponsiveLayout>
-            <Routes>
+            <div className="w-full h-full">
+              <Routes>
               {/* AUTH */}
               <Route path="/" element={<Login />} />
               {/* <Route path="/signup" element={<SignUp />} /> */}
@@ -289,7 +290,7 @@ const AdminLayout = () => {
 
               {/* LEAD MANAGEMENT */}
               <Route path="/lead-management" element={<LeadManagement />} />
-              <Route path="/lead-management/view" element={<LeadView />} />
+              <Route path="/lead-management/view/:id" element={<LeadView />} />
               <Route
                 path="/lead-management/view/assign-lead"
                 element={<AssignLead />}
@@ -332,6 +333,7 @@ const AdminLayout = () => {
               <Route path="/popular-cities/edit-city/:id" element={<EditCity />} />
                     
             </Routes>
+            </div>
           </ResponsiveLayout>
         </main>
       </div>
