@@ -9,6 +9,9 @@ import productReducer from './slices/productSlice';
 import adminProfileReducer from "../redux/slices/adminProfileSlice";
 import leadReducer from '../redux/slices/leadSlice';
 import rolesReducer from "./slices/rolesSlice";
+import orderReducer from "../redux/slices/orderSlice"
+
+
 export const store = configureStore({
   reducer: {
     // auth: authReducer,
@@ -22,6 +25,8 @@ export const store = configureStore({
     adminProfile: adminProfileReducer,
     leads: leadReducer,
     role: rolesReducer,
+    order: orderReducer,
+    
   },
   devTools: import.meta.env.MODE !== "production",
 });
