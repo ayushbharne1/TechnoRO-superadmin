@@ -7,7 +7,8 @@ import serviceEngineerReducer from "../redux/slices/serviceEngineerSlice"
 import serviceReducer from "./slices/serviceSlice";
 import productReducer from './slices/productSlice'; 
 import adminProfileReducer from "../redux/slices/adminProfileSlice";
-import leadReducer from '../redux/slices/leadSlice'
+import leadReducer from '../redux/slices/leadSlice';
+import rolesReducer from "./slices/rolesSlice";
 export const store = configureStore({
   reducer: {
     // auth: authReducer,
@@ -20,6 +21,7 @@ export const store = configureStore({
     products: productReducer,
     adminProfile: adminProfileReducer,
     leads: leadReducer,
+    role: rolesReducer,
   },
   devTools: import.meta.env.MODE !== "production",
 });

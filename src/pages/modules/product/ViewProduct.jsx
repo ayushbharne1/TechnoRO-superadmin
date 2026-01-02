@@ -162,7 +162,7 @@ const ViewProduct = () => {
                 </div>
               </div>
             )}
-            {product.warrantyPeriod > 0 && (
+            {product.warrantyPeriod >= 0 && (
               <>
                 
                 <span className="text-gray-800 pb-3">

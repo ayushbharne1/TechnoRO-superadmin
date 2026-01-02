@@ -1,5 +1,3 @@
-// src/pages/vendor/Vendor.jsx - VERIFIED AND CORRECTED
-
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,7 +12,7 @@ const Vendor = () => {
   const dispatch = useDispatch();
   const { list: rows, loading: isLoading } = useSelector((s) => s.vendor);
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(6);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
@@ -32,7 +30,7 @@ const Vendor = () => {
   }, [load]);
   
   const handleAdd = () => navigate("/vendors/addvendor");
-  const handleView = (row) => navigate(`/vendors/viewvendor/${row._id}`);
+  const handleView = (row) => navigate(`/vendors/details/${row._id}`);
   const handleEdit = (row) => navigate(`/vendors/editvendor/${row._id}`);
 
   // CORRECTED: This function now informs the user that delete is not available.
@@ -53,13 +51,13 @@ const Vendor = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-4 min-h-screen flex flex-col gap-6">
-      <Header2 />
+    <div className="bg-white p-4 min-h-screen flex flex-col gap-6">
+      <Header2 title="Vendor List" />
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow flex flex-col sm:flex-row items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-poppins text-[16px]">Show</span>
           <select value={rowsPerPage} onChange={handleRowsPerPage} className="p-2 border rounded w-[60px]">
-            {[6, 10, 25, 50].map((num) => (<option key={num} value={num}>{num}</option>))}
+            {[5, 10, 15, 20].map((num) => (<option key={num} value={num}>{num}</option>))}
           </select>
           <span className="font-poppins text-[16px]">Entries</span>
         </div>

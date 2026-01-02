@@ -1,5 +1,3 @@
-// src/pages/manufacturer/EditManufacturer.jsx - VERIFIED AND CORRECTED
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,6 +15,7 @@ const EditManufacturer = () => {
     phone: "",
     address: "",
     email: "",
+    password: "",
     aadharNo: "",
     panNo: "",
     gst: "",
@@ -27,6 +26,33 @@ const EditManufacturer = () => {
     accountType: "",
   });
   const [error, setError] = useState("");
+
+  // Extract a readable error message from common Axios/backend shapes
+  const extractErrorMessage = (err) => {
+    const res = err?.response?.data;
+    if (res?.errors && Array.isArray(res.errors)) {
+      return res.errors
+        .map((e) => {
+          if (typeof e === "string") return e;
+          return e.field ? `${e.field}: ${e.message}` : e.message;
+        })
+        .filter(Boolean)
+        .join("\n");
+    }
+    if (err?.errors && Array.isArray(err.errors)) {
+      return err.errors
+        .map((e) => {
+          if (typeof e === "string") return e;
+          return e.field ? `${e.field}: ${e.message}` : e.message;
+        })
+        .filter(Boolean)
+        .join("\n");
+    }
+    if (typeof res?.message === "string" && res.message.trim()) return res.message;
+    if (typeof res?.error === "string" && res.error.trim()) return res.error;
+    if (typeof res === "string" && res.trim()) return res;
+    return err?.message || "An error occurred. Please check all fields.";
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
@@ -45,6 +71,7 @@ const EditManufacturer = () => {
         phone: phone || "",
         address: address || "",
         email: email || "",
+        password: "",
         aadharNo: aadharNo || "",
         panNo: panNo || "",
         gst: gst || "",
@@ -76,6 +103,7 @@ const EditManufacturer = () => {
       panNo: formData.panNo,
       gst: formData.gst,
       address: formData.address,
+      password: formData.password,
     };
 
     const payload = Object.entries(base).reduce((acc, [k, v]) => {
@@ -103,6 +131,15 @@ const EditManufacturer = () => {
       if (Object.keys(cleanedBank).length) payload.bankDetails = cleanedBank;
     }
 
+    // Remove password if not provided or too short
+    if (payload.password && String(payload.password).trim().length < 6) {
+      setError("Password must be at least 6 characters if provided.");
+      return;
+    }
+    if (!payload.password || String(payload.password).trim() === "") {
+      delete payload.password;
+    }
+
     setError("");
 
     try {
@@ -111,15 +148,15 @@ const EditManufacturer = () => {
       navigate(`/manufacturer/viewmanufacturer/${id}`);
     } catch (err) {
       console.error("Failed to update manufacturer:", err);
-      setError(err?.message || "An error occurred during update.");
+      setError(extractErrorMessage(err));
     }
   };
 
   if (isBusy && !formData.name) return <div className="p-6 text-center">Loading...</div>;
 
   return (
-    <div className="bg-white min-h-screen flex flex-col">
-      <Header2 />
+    <div className="bg-white p-4 min-h-screen flex flex-col">
+      <Header2 title="Edit Manufacturer Details" />
       <div className="bg-white p-6 shadow-lg flex flex-col gap-8 w-full h-full">
         <form onSubmit={handleUpdate} className="flex flex-col gap-8 w-full">
           {/* All form fields are correctly mapped to the updated formData state */}
@@ -138,10 +175,10 @@ const EditManufacturer = () => {
               <label className="font-poppins font-medium text-gray-700 text-[16px]">Email</label>
               <input type="email" name="email" value={formData.email} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5]" />
             </div>
-          </div>
-          <div className="flex-1 flex flex-col gap-2">
-            <label className="font-poppins font-medium text-gray-700 text-[16px]">Address</label>
-            <input type="text" name="address" value={formData.address} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5]" />
+            <div className="flex-1 flex flex-col gap-2">
+              <label className="font-poppins font-medium text-gray-700 text-[16px]">Address</label>
+              <input type="text" name="address" value={formData.address} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5]" />
+            </div>
           </div>
           <div className="flex flex-col md:flex-row gap-6 w-full">
             <div className="flex-1 flex flex-col gap-2">
@@ -153,9 +190,22 @@ const EditManufacturer = () => {
               <input type="text" name="panNo" value={formData.panNo} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5]" />
             </div>
           </div>
-           <div className="flex flex-col gap-2 w-full md:w-1/2 pr-0 md:pr-3">
-            <label className="font-poppins font-medium text-gray-700 text-[16px]">GSTIN</label>
-            <input type="text" name="gst" value={formData.gst} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5] w-full" />
+          <div className="flex flex-col md:flex-row gap-6 w-full">
+            <div className="flex-1 flex flex-col gap-2">
+              <label className="font-poppins font-medium text-gray-700 text-[16px]">GSTIN</label>
+              <input type="text" name="gst" value={formData.gst} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5] w-full" />
+            </div>
+            <div className="flex-1 flex flex-col gap-2">
+              <label className="font-poppins font-medium text-gray-700 text-[16px]">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password || ""}
+                onChange={handleChange}
+                className="p-3 border border-[#606060] bg-[#F5F5F5]"
+                placeholder="Enter new password (optional)"
+              />
+            </div>
           </div>
           <div className="mt-4"><h2 className="text-[#2F8868] font-semibold flex items-center gap-2"><img src={bankIcon} alt="bank"/>Bank Details</h2></div>
           <div className="flex flex-col md:flex-row gap-6 w-full mt-2">
@@ -190,7 +240,12 @@ const EditManufacturer = () => {
               </select>
             </div>
           </div>
-          {error && <p className="text-red-500 text-center">{error}</p>}
+          {error && (
+            <div className="rounded-md border border-red-300 bg-red-50 text-red-700 p-3">
+              <div className="font-semibold">There was a problem</div>
+              <pre className="whitespace-pre-wrap text-sm mt-1">{error}</pre>
+            </div>
+          )}
           <div className="flex justify-center w-full mt-6">
             <button type="submit" disabled={isBusy} className="bg-[#7EC1B1] text-white font-poppins font-semibold px-6 py-3 rounded-lg hover:bg-[#65a89d] transition w-full md:w-1/8 disabled:bg-gray-400">
               {isBusy ? "Updating..." : "Update"}
