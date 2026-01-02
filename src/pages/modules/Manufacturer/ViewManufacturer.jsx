@@ -9,6 +9,7 @@ import Header2 from "../../../components/superAdmin/header/Header2";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { Eye } from "lucide-react";
 
 /* -------------------- DUMMY DATA -------------------- */
 const stats = [
@@ -72,20 +73,13 @@ const ViewManufacturer = () => {
   }
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="min-h-screen bg-white p-4 sm:p-6 space-y-6">
       <Header2 />
 
-      <div className="p-6">
-        {/* Breadcrumb */}
-        <div className="text-sm text-gray-500 mb-3">
-          Manufacturer &gt;{" "}
-          <span className="text-blue-600 font-medium">
-            Manufacturer Details
-          </span>
-        </div>
-
+      {/* Details Card */}
+      <div className="bg-white rounded-lg p-6 space-y-6">
         {/* Title + Status */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center">
           <h2 className="text-3xl font-bold text-[#263138]">
             {manufacturer.name}
           </h2>
@@ -116,7 +110,7 @@ const ViewManufacturer = () => {
         </div>
 
         {/* Address + Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Map */}
           <div>
             <div className="text-gray-500 mb-1">📍 Address</div>
@@ -158,7 +152,7 @@ const ViewManufacturer = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {stats.map((s, i) => (
             <div
               key={i}
@@ -178,7 +172,7 @@ const ViewManufacturer = () => {
         </div>
 
         {/* Assigned Orders */}
-        <h3 className="text-xl font-semibold text-[#263138] mb-3">
+        <h3 className="text-xl font-semibold text-[#263138]">
           Assigned Orders
         </h3>
 
@@ -206,32 +200,30 @@ const ViewManufacturer = () => {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto border border-gray-200 rounded-md">
+          <div className="border border-gray-100 rounded-md overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="p-3 text-center">Sr.No.</th>
-                  <th className="p-3 text-center">Order ID</th>
-                  <th className="p-3 text-center">Customer Name</th>
-                  <th className="p-3 text-center">Product Ordered</th>
-                  <th className="p-3 text-center">Order Date</th>
-                  <th className="p-3 text-center">Status</th>
-                  <th className="p-3 text-center">Action</th>
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr className="text-center font-medium">
+                  <th className="p-3">Sr.No.</th>
+                  <th className="p-3">Order ID</th>
+                  <th className="p-3">Customer Name</th>
+                  <th className="p-3">Product Ordered</th>
+                  <th className="p-3">Order Date</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((o, idx) => (
-                  <tr key={o.id} className="border-b last:border-b-0">
-                    <td className="p-3 text-center">{idx + 1}</td>
-                    <td className="p-3 text-center">{o.orderId}</td>
-                    <td className="p-3 text-center">{o.customer}</td>
-                    <td className="p-3 text-center">{o.product}</td>
-                    <td className="p-3 text-center">{o.date}</td>
-                    <td className="p-3 text-center font-medium text-blue-600">
-                      {o.status}
-                    </td>
-                    <td className="p-3 text-center cursor-pointer text-blue-600">
-                      👁
+                  <tr key={o.id} className="border-b border-gray-100 text-center">
+                    <td className="p-3">{idx + 1}</td>
+                    <td className="p-3">{o.orderId}</td>
+                    <td className="p-3">{o.customer}</td>
+                    <td className="p-3">{o.product}</td>
+                    <td className="p-3">{o.date}</td>
+                    <td className="p-3 font-medium text-blue-600">{o.status}</td>
+                    <td className="p-3 flex justify-center">
+                      <Eye className="text-blue-500 cursor-pointer" />
                     </td>
                   </tr>
                 ))}
