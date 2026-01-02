@@ -52,6 +52,7 @@ import CancelledOrderPreview from "../components/superAdmin/pages/CancelledOrder
 
 import Order from "../pages/modules/Order/Order";
 import ViewOrder from "../pages/modules/Order/ViewOrder";
+import AssignOrder from "../pages/modules/Order/AssignOrder";
 
 // --- OFFERS ---
 import Offers from "../pages/modules/Offers/Offers";
@@ -218,7 +219,9 @@ const AdminLayout = () => {
               />
 
               <Route path="/order-management" element={<Order />} />
-              <Route path="/order-management/view/" element={<ViewOrder />} />
+              <Route path="/order-management/view/:id" element={<ViewOrder />} />
+              <Route path="/order-management/assign/:id" element={<AssignOrder />} />
+              
 
               {/* OFFERS */}
               <Route path="/Offers" element={<Offers />} />
