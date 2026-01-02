@@ -40,7 +40,7 @@ const ViewSubAdmin = () => {
   return (
     <div className="min-h-screen bg-white p-6 gap-6 font-[Poppins]">
 
-<Header2 title="View Sub Admin"/>    
+<Header2 title="Sub Admin Details"/>    
 
       {/* User Info */}
       <div className="bg-white rounded-xl shadow p-6 mb-6">

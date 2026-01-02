@@ -43,9 +43,13 @@ const Header2 = ({ title }) => {
     "/manufacturer/viewmanufacturer": "Manufacturer Details",
     "/manufacturer/viewmanufacturer/:id": "Manufacturer Details",
 
-    "/vendors": "Vendors",
+    "/vendors": "Vendor",
     "/vendors/addvendor": "Add Vendor",
+    "/vendors/editvendor": "Edit Vendor",
     "/vendors/editvendor/": "Edit Vendor",
+    "/vendors/editvendor/:id": "Edit Vendor",
+    "/vendors/details": "Vendor Details",
+    "/vendors/details/:id": "Vendor Details",
 
     "/pendingServices": "Pending Services",
     "/technicianActivity": "Technician Activity",
@@ -54,7 +58,7 @@ const Header2 = ({ title }) => {
     "/service-engineer": "Service Engineer",
 
     "/roles-permission": "Roles & Permission",
-    "/roles-permission/view-sub-admin": "View Sub Admin",
+    "/roles-permission/view-sub-admin": "Sub Admin Details",
     "/roles-permission/edit-sub-admin": "Edit Sub Admin",
     "/roles-permission/create-sub-admin": "Create Sub Admin",
     "/report-analytics": "Report & Analytics",

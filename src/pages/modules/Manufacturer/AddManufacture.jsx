@@ -1,5 +1,3 @@
-// src/pages/manufacturer/AddManufacturer.jsx - VERIFIED AND CORRECTED
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,6 +13,7 @@ const AddManufacturer = () => {
     phone: "",
     address: "",
     email: "",
+    password: "",
     aadhaar: "", // The form state can keep this name
     pan: "",       // The form state can keep this name
     gst: "",
@@ -27,6 +26,50 @@ const AddManufacturer = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Extract a readable error message from common Axios/backend shapes
+  const extractErrorMessage = (err) => {
+    const res = err?.response?.data;
+    if (res?.errors && Array.isArray(res.errors)) {
+      return res.errors
+        .map((e) => {
+          if (typeof e === 'string') return e;
+          return e.field ? `${e.field}: ${e.message}` : e.message;
+        })
+        .filter(Boolean)
+        .join("\n");
+    }
+    if (err?.errors && Array.isArray(err.errors)) {
+      return err.errors
+        .map((e) => {
+          if (typeof e === 'string') return e;
+          return e.field ? `${e.field}: ${e.message}` : e.message;
+        })
+        .filter(Boolean)
+        .join("\n");
+    }
+    if (typeof res?.message === "string" && res.message.trim()) return res.message;
+    if (typeof res?.error === "string" && res.error.trim()) return res.error;
+    if (typeof res === "string" && res.trim()) return res;
+    return err?.message || "An error occurred. Please check all fields.";
+  };
+
+  // Basic client-side validation to surface immediate input issues
+  const validate = () => {
+    const msgs = [];
+    if (!formData.name.trim()) msgs.push("Manufacturer Name is required");
+    if (!formData.phone.trim()) msgs.push("Phone number is required");
+    if (!/^[0-9]{10,13}$/.test(formData.phone.trim())) msgs.push("Phone number must be 10-13 digits");
+    if (!formData.email.trim()) msgs.push("Email is required");
+    if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) msgs.push("Enter a valid email address");
+    if (!formData.password.trim()) msgs.push("Password is required");
+    if (formData.password && formData.password.trim().length < 6) msgs.push("Password must be at least 6 characters");
+    if (!formData.address.trim()) msgs.push("Address is required");
+    if (formData.aadhaar && !/^\d{12}$/.test(formData.aadhaar.trim())) msgs.push("Aadhaar must be 12 digits");
+    if (formData.pan && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(formData.pan.trim())) msgs.push("Enter a valid PAN (e.g., ABCDE1234F)");
+    if (formData.gst && formData.gst.trim().length !== 15) msgs.push("GSTIN must be 15 characters");
+    return msgs;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -36,6 +79,12 @@ const AddManufacturer = () => {
     const token = localStorage.getItem("adminToken");
     if (!token) {
       navigate("/");
+      return;
+    }
+
+    const validationErrors = validate();
+    if (validationErrors.length) {
+      setError(validationErrors.join("\n"));
       return;
     }
 
@@ -52,7 +101,7 @@ const AddManufacturer = () => {
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
-      password: "password123",
+      password: formData.password,
       aadharNo: formData.aadhaar,
       panNo: formData.pan,
       gst: formData.gst,
@@ -68,18 +117,13 @@ const AddManufacturer = () => {
       navigate("/manufacturer");
     } catch (err) {
       console.error("Failed to add manufacturer:", err);
-      if (err?.errors) {
-        const errorMessages = err.errors.map(e => `${e.field}: ${e.message}`).join('\n');
-        setError(errorMessages);
-      } else {
-        setError(err?.message || "An error occurred. Please check all fields.");
-      }
+      setError(extractErrorMessage(err));
     }
   };
 
   return (
-    <div className="bg-white min-h-screen flex flex-col">
-      <Header2 />
+    <div className="bg-white p-4 min-h-screen flex flex-col">
+      <Header2 title="Add Manufacturer" />
       <div className="bg-white p-6 shadow-lg flex flex-col gap-8 w-full h-full">
         <div className="flex flex-col md:flex-row gap-6 w-full">
           <div className="flex-1 flex flex-col gap-2">
@@ -97,9 +141,6 @@ const AddManufacturer = () => {
             <label className="font-poppins font-medium text-gray-700 text-[16px]">Email</label>
             <input type="email" name="email" placeholder="Enter Email" value={formData.email} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5]" />
           </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-6 w-full">
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">Address</label>
             <input type="text" name="address" placeholder="Enter Address" value={formData.address} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5]" />
@@ -117,9 +158,22 @@ const AddManufacturer = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 w-full md:w-1/2 pr-0 md:pr-3">
+        <div className="flex flex-col md:flex-row gap-6 w-full">
+          <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">GSTIN</label>
             <input type="text" name="gst" placeholder="Enter GSTIN" value={formData.gst} onChange={handleChange} className="p-3 border border-[#606060] bg-[#F5F5F5] w-full" />
+          </div>
+          <div className="flex-1 flex flex-col gap-2">
+            <label className="font-poppins font-medium text-gray-700 text-[16px]">Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter Password"
+              value={formData.password}
+              onChange={handleChange}
+              className="p-3 border border-[#606060] bg-[#F5F5F5]"
+            />
+          </div>
         </div>
         
         <div className="mt-4"><h2 className="text-[#2F8868] font-semibold flex items-center gap-2"><img src={bankIcon} alt="bank" />Bank Details</h2></div>
@@ -159,7 +213,12 @@ const AddManufacturer = () => {
           </div>
         </div>
         
-        {error && <pre className="text-red-500 text-center whitespace-pre-wrap">{error}</pre>}
+        {error && (
+          <div className="rounded-md border border-red-300 bg-red-50 text-red-700 p-3">
+            <div className="font-semibold">There was a problem</div>
+            <pre className="whitespace-pre-wrap text-sm mt-1">{error}</pre>
+          </div>
+        )}
         
         <div className="flex justify-center w-full mt-6">
           <button onClick={handleAdd} disabled={isSubmitting} className="bg-[#7EC1B1] text-white font-poppins font-semibold px-6 py-3 rounded-lg hover:bg-[#65a89d] transition w-full md:w-1/8 disabled:bg-gray-400">
