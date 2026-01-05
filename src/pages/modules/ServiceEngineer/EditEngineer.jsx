@@ -19,6 +19,7 @@ const EditEngineer = () => {
   );
 
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [skill, setSkill] = useState("");
   const [phone, setPhone] = useState("");
   const [assignedArea, setAssignedArea] = useState("");
@@ -40,6 +41,7 @@ const EditEngineer = () => {
   useEffect(() => {
     if (currentEngineer) {
       setFullName(currentEngineer.name || "");
+      setEmail(currentEngineer.email || "");
       setSkill(currentEngineer.skills?.[0] || "");
       setPhone(currentEngineer.phone || "");
       setAssignedArea(currentEngineer.assignedArea || "");
@@ -57,7 +59,7 @@ const EditEngineer = () => {
   const handleUpdate = () => {
     const payload = {
       name: fullName,
-      email: `${phone}@engineer.com`,
+      email: email,
       phone: phone,
       password: password,
       assignedArea: assignedArea,
@@ -92,14 +94,11 @@ const EditEngineer = () => {
               className="p-3 w-full border border-[#606060] bg-[#F5F5F5]"
             >
               <option value="">Select Skill</option>
-              <option value="Web Developer">Web Developer</option>
-              <option value="SEO Specialist">SEO Specialist</option>
-              <option value="Graphic Designer">Graphic Designer</option>
-              <option value="Digital Marketer">Digital Marketer</option>
-              <option value="App Developer">App Developer</option>
-              <option value="Content Writer">Content Writer</option>
-              <option value="UI/UX Designer">UI/UX Designer</option>
-              <option value="Email Marketer">Email Marketer</option>
+              <option value="RO Installation">RO Installation</option>
+              <option value="RO Repair & Troubleshooting">RO Repair & Troubleshooting</option>
+              <option value="Routine Maintenance">Routine Maintenance</option>
+              <option value="Water Source Understanding">Water Source Understanding</option>
+              <option value="TDS & Water Testing">TDS & Water Testing</option>
             </select>
           </div>
         </div>
@@ -117,11 +116,11 @@ const EditEngineer = () => {
           </div>
 
           <div className="flex-1 flex flex-col gap-2 w-full">
-            <label>Assigned Area</label>
+            <label>Email</label>
             <input
-              type="text"
-              value={assignedArea}
-              onChange={(e) => setAssignedArea(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="p-3 w-full border border-[#606060] bg-[#F5F5F5]"
             />
           </div>
@@ -129,12 +128,21 @@ const EditEngineer = () => {
 
         {/* Password */}
         <div className="flex flex-col md:flex-row gap-6 w-full">
-          <div className="md:w-1/2 w-full flex flex-col gap-2">
+          <div className="flex-1 flex flex-col gap-2 w-full">
             <label>Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="p-3 w-full border border-[#606060] bg-[#F5F5F5]"
+            />
+          </div>
+          <div className="flex-1 flex flex-col gap-2 w-full">
+            <label>Assigned Area</label>
+            <input
+              type="text"
+              value={assignedArea}
+              onChange={(e) => setAssignedArea(e.target.value)}
               className="p-3 w-full border border-[#606060] bg-[#F5F5F5]"
             />
           </div>

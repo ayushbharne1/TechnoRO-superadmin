@@ -156,7 +156,7 @@ const Product = () => {
                     <td className="p-3" title={row.name}>
                         {row.name.length > 40 ? row.name.substring(0, 40) + '...' : row.name}
                     </td>
-                    <td className="p-3 text-center font-medium">₹{row.discountedPrice || row.price}</td>
+                    <td className="p-3 text-center font-medium">₹{row.price}</td>
                     <td className="p-3 text-center">{row.warrantyPeriod} Years</td>
                     <td className="p-3 text-center">{row.discountPercent}%</td>
                     <td className={`p-3 text-center  ${getStatusColor(row.status)}`}>
