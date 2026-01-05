@@ -140,13 +140,9 @@ const AdminLayout = () => {
   const isAuthPage = ["/", "/signup"].includes(location.pathname);
 
   return (
-    <div className="flex h-screen w-full bg-gray-50 overflow-hidden w-[270px]">
+    <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
       {/* Sidebar */}
-      {!isAuthPage && (
-        <div className="hidden md:flex flex-shrink-0">
-          <Sidebar />
-        </div>
-      )}
+      {!isAuthPage && <Sidebar />}
 
       <div className="flex flex-col flex-1 min-w-0 h-screen">
         {/* Header */}
