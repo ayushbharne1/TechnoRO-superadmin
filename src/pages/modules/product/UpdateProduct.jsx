@@ -120,7 +120,15 @@ const UpdateProduct = () => {
     if (!formData.category) return toast.error("Category is required");
     if (!formData.name) return toast.error("Product Name is required");
     if (!formData.price || Number(formData.price) < 0) return toast.error("Price must be valid");
-    if (!formData.stock || Number(formData.stock) < 0) return toast.error("Stock must be a positive number");
+    
+    // ✅ FIXED: Check if stock is empty string or undefined, and if it's a valid number >= 0
+    if (formData.stock === "" || formData.stock === null || formData.stock === undefined) {
+      return toast.error("Stock quantity is required");
+    }
+    if (Number(formData.stock) < 0) {
+      return toast.error("Stock must be a positive number or zero");
+    }
+    
     if (!formData.color) return toast.error("Color is required");
     if (!formData.material) return toast.error("Material is required");
     
