@@ -1,28 +1,7 @@
 import { useState } from 'react';
-import { Plus, Trash2, Users, MapPin, MessageCircle, Calendar } from 'lucide-react';
+import { Plus, Trash2, MapPin, MessageCircle, Calendar } from 'lucide-react';
 
-export default function RecentlyServedManager() {
-  const [customers, setCustomers] = useState([
-    {
-      id: 1,
-      name: 'Vinayak thool',
-      initials: 'NT',
-      date: '2025-02-25',
-      address: 'Dr.Ambedkar Nagar Dharampeth Nagpur',
-      query: 'lg ro service centre near me',
-      status: 'Served'
-    },
-    {
-      id: 2,
-      name: 'Rahul Sharma',
-      initials: 'MM',
-      date: '2025-02-25',
-      address: '60,Taj Manzil, Teachers Colony, Jaffar Nagar, Nagpur-440013',
-      query: 'lg ro water purifier service center',
-      status: 'Served'
-    },
-
-  ]);
+export default function RecentlyServedManager({ servedCustomers = [], setServedCustomers }) {
 
   const [formData, setFormData] = useState({
     name: '',
@@ -57,7 +36,7 @@ export default function RecentlyServedManager() {
         ...formData,
         initials: formData.initials || generateInitials(formData.name)
       };
-      setCustomers([...customers, newCustomer]);
+      setServedCustomers([...(servedCustomers || []), newCustomer]);
       setFormData({
         name: '',
         initials: '',
@@ -70,7 +49,7 @@ export default function RecentlyServedManager() {
   };
 
   const deleteCustomer = (id) => {
-    setCustomers(customers.filter(customer => customer.id !== id));
+    setServedCustomers((servedCustomers || []).filter(customer => customer.id !== id));
   };
 
   const getAvatarColor = (index) => {
@@ -261,16 +240,16 @@ export default function RecentlyServedManager() {
         {/* Customer Records */}
         <div>
           <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-            Customer Records ({customers.length})
+            Customer Records ({(servedCustomers || []).length})
           </h2>
 
-          {customers.length === 0 ? (
+          {(servedCustomers || []).length === 0 ? (
             <div className="bg-white rounded-2xl  p-12 text-center text-gray-500">
               No customer records yet. Add your first record above!
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {customers.map((customer, index) => (
+              {(servedCustomers || []).map((customer, index) => (
                 <CustomerCard
                   key={customer.id}
                   customer={customer}

@@ -1,15 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, MapPin, Clock, Navigation } from 'lucide-react';
 
-export default function StoreLocationManager() {
-  const [stores, setStores] = useState([
-    {
-      id: 1,
-      name: 'RO Service Center Nagpur',
-      address: 'Sbi bank Sharda chowk, Nagpur, Maharashtra, 440024',
-      timing: '10 AM To 10 PM'
-    }
-  ]);
+export default function StoreLocationManager({ storeLocations = [], setStoreLocations }) {
 
   const [formData, setFormData] = useState({
     name: '',
@@ -31,7 +23,7 @@ export default function StoreLocationManager() {
         id: Date.now(),
         ...formData
       };
-      setStores([...stores, newStore]);
+      setStoreLocations([...(storeLocations || []), newStore]);
       setFormData({
         name: '',
         address: '',
@@ -41,7 +33,7 @@ export default function StoreLocationManager() {
   };
 
   const deleteStore = (id) => {
-    setStores(stores.filter(store => store.id !== id));
+    setStoreLocations((storeLocations || []).filter(store => store.id !== id));
   };
 
   const StoreCard = ({ store, onDelete }) => (
@@ -147,16 +139,16 @@ export default function StoreLocationManager() {
         {/* Store Locations List */}
         <div>
           <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-            All Store Locations ({stores.length})
+            All Store Locations ({(storeLocations || []).length})
           </h2>
 
-          {stores.length === 0 ? (
+          {(storeLocations || []).length === 0 ? (
             <div className="bg-white rounded-2xl shadow-lg p-12 text-center text-gray-500">
               No store locations yet. Add your first store above!
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-6">
-              {stores.map((store) => (
+              {(storeLocations || []).map((store) => (
                 <StoreCard
                   key={store.id}
                   store={store}

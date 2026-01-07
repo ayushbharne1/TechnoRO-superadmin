@@ -14,15 +14,26 @@ const AddCity = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [cityName, setCityName] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-  const [whatsappLink, setWhatsappLink] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
+  // const [whatsappLink, setWhatsappLink] = useState("");
   
   // Separate state for each editor
   const [overview, setOverview] = useState("");
   const [features, setFeatures] = useState("");
   const [installation, setInstallation] = useState("");
+  
+  // State for child components data
+  const [servedCustomers, setServedCustomers] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [faqs, setFaqs] = useState([]);
+  const [storeLocations, setStoreLocations] = useState([]);
+  
+  // Loading and error states
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   
   // Separate refs for each editor
   const overviewRef = React.useRef(null);
@@ -74,33 +85,56 @@ const AddCity = () => {
     []
   );
 
-  const handleAdd = () => {
-    dispatch(
-      addPopularCity({
-        cityName,
-        contactNumber,
-        whatsappLink,
-        contactEmail,
-        overview,
-        features,
-        installation,
-      })
-    );
+  const handleAdd = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const result = await dispatch(
+        addPopularCity({
+          city,
+          state,
+          mobile,
+          email,
+          // whatsappLink,
+          overview,
+          features,
+          installation,
+          servedCustomers,
+          reviews,
+          faqs,
+          storeLocations,
+        })
+      );
 
-    // Reset form fields
-    setCityName("");
-    setContactNumber("");
-    setWhatsappLink("");
-    setContactEmail("");
-    setOverview("");
-    setFeatures("");
-    setInstallation("");
+      if (result.type === addPopularCity.fulfilled.type) {
+        // Reset form fields
+        setCity("");
+        setState("");
+        setMobile("");
+        setEmail("");
+        // setWhatsappLink("");
+        setOverview("");
+        setFeatures("");
+        setInstallation("");
+        setServedCustomers([]);
+        setReviews([]);
+        setFaqs([]);
+        setStoreLocations([]);
 
-    // Show success message
-    alert("City added successfully!");
+        // Show success message
+        alert("City added successfully!");
 
-    // Navigate back to the previous page
-    navigate("/popular-cities");
+        // Navigate back to the previous page
+        navigate("/popular-cities");
+      } else if (result.type === addPopularCity.rejected.type) {
+        setError(result.payload?.message || "Failed to add city. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -110,7 +144,7 @@ const AddCity = () => {
 
       {/* Form Section */}
       <div className="bg-white mt-5 flex flex-col gap-8 w-full h-full">
-        {/* Row 1: City Name & Contact Number */}
+        {/* Row 1: City Name & State */}
         <div className="flex flex-col md:flex-row gap-6 w-full">
           {/* City Name Field */}
           <div className="flex-1 flex flex-col gap-2">
@@ -120,32 +154,64 @@ const AddCity = () => {
             <input
               type="text"
               placeholder="Enter City Name"
-              value={cityName}
-              onChange={(e) => setCityName(e.target.value)}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
               className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
               required
             />
           </div>
 
-          {/* Contact Number Field */}
+          {/* State Field */}
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">
-              Contact Number
+              State
             </label>
             <input
               type="text"
-              placeholder="Enter Contact Number"
-              value={contactNumber}
-              onChange={(e) => setContactNumber(e.target.value)}
+              placeholder="Enter State Name"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
               className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
               required
             />
           </div>
         </div>
 
-        {/* Row 2: WhatsApp Link & Contact Email */}
+        {/* Row 2: Mobile & Email */}
         <div className="flex flex-col md:flex-row gap-6 w-full">
-          {/* WhatsApp Link Field */}
+          {/* Mobile Number Field */}
+          <div className="flex-1 flex flex-col gap-2">
+            <label className="font-poppins font-medium text-gray-700 text-[16px]">
+              Mobile Number
+            </label>
+            <input
+              type="tel"
+              placeholder="Enter Mobile Number"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
+              required
+            />
+          </div>
+
+          {/* Email Field */}
+          <div className="flex-1 flex flex-col gap-2">
+            <label className="font-poppins font-medium text-gray-700 text-[16px]">
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="Enter Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
+              required
+            />
+          </div>
+        </div>
+
+        {/* Row 3: WhatsApp Link */}
+        {/* <div className="flex flex-col w-full">
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">
               WhatsApp Link
@@ -159,22 +225,7 @@ const AddCity = () => {
               required
             />
           </div>
-
-          {/* Contact Email Field */}
-          <div className="flex-1 flex flex-col gap-2">
-            <label className="font-poppins font-medium text-gray-700 text-[16px]">
-              Contact Email
-            </label>
-            <input
-              type="email"
-              placeholder="Enter Contact Email"
-              value={contactEmail}
-              onChange={(e) => setContactEmail(e.target.value)}
-              className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
-              required
-            />
-          </div>
-        </div>
+        </div> */}
 
         {/* Overview Editor */}
         <div className="flex flex-col gap-3">
@@ -184,12 +235,11 @@ const AddCity = () => {
           <div className="border border-gray-300 rounded-lg overflow-hidden">
             <JoditEditor
               ref={overviewRef}
-              value={overview}
+              defaultValue={overview}
               config={editorConfig}
               tabIndex={1}
-              onChange={(newContent) => {
-                setOverview(newContent);
-              }}
+              onBlur={(newContent) => setOverview(newContent)}
+              onChange={() => {}}
             />
           </div>
         </div>
@@ -202,12 +252,11 @@ const AddCity = () => {
           <div className="border border-gray-300 rounded-lg overflow-hidden">
             <JoditEditor
               ref={featuresRef}
-              value={features}
+              defaultValue={features}
               config={editorConfig}
               tabIndex={2}
-              onChange={(newContent) => {
-                setFeatures(newContent);
-              }}
+              onBlur={(newContent) => setFeatures(newContent)}
+              onChange={() => {}}
             />
           </div>
         </div>
@@ -220,27 +269,35 @@ const AddCity = () => {
           <div className="border border-gray-300 rounded-lg overflow-hidden">
             <JoditEditor
               ref={installationRef}
-              value={installation}
+              defaultValue={installation}
               config={editorConfig}
               tabIndex={3}
-              onChange={(newContent) => {
-                setInstallation(newContent);
-              }}
+              onBlur={(newContent) => setInstallation(newContent)}
+              onChange={() => {}}
             />
           </div>
         </div>
 
-        <Faq />
-        <ReviewManager />
-        <RecentlyServedManager />
-        <StoreLocationManager />
+        <Faq faqs={faqs} setFaqs={setFaqs} />
+        <ReviewManager reviews={reviews} setReviews={setReviews} />
+        <RecentlyServedManager servedCustomers={servedCustomers} setServedCustomers={setServedCustomers} />
+        <StoreLocationManager storeLocations={storeLocations} setStoreLocations={setStoreLocations} />
+        
+        {/* Error Message */}
+        {error && (
+          <div className="w-full p-4 bg-red-50 border border-red-300 rounded-lg">
+            <p className="text-red-600 font-poppins text-sm">{error}</p>
+          </div>
+        )}
+
         {/* Add Button */}
         <div className="flex justify-center w-full mt-6">
           <button
             onClick={handleAdd}
-            className="bg-[#7EC1B1] text-white font-poppins font-semibold px-6 py-3 rounded-lg hover:bg-[#65a89d] transition w-full md:w-1/4"
+            disabled={isLoading}
+            className="bg-[#7EC1B1] text-white font-poppins font-semibold px-6 py-3 rounded-lg hover:bg-[#65a89d] transition w-full md:w-1/4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Add City
+            {isLoading ? "Adding..." : "Add City"}
           </button>
         </div>
       </div>
