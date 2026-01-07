@@ -1,17 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, Star } from 'lucide-react';
 
-export default function ReviewManager() {
-  const [reviews, setReviews] = useState([
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      location: 'Gurgaon, Maharashtra',
-      rating: 5,
-      review: 'Being a student on a budget. I love that RO Care show me exactly what I\'ll pay upfront. The eco-friendly Products options are a huge plus and i can easily repair with with just few click.',
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop'
-    }
-  ]);
+export default function ReviewManager({ reviews = [], setReviews }) {
 
   const [formData, setFormData] = useState({
     name: '',

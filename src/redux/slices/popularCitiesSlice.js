@@ -43,38 +43,95 @@ export const fetchPopularCities = createAsyncThunk(
 export const addPopularCity = createAsyncThunk(
   "popularCities/add",
   async (
-    { cityName, contactNumber, contactEmail, whatsappLink },
+    {
+      city,
+      state,
+      mobile,
+      email,
+      whatsappLink,
+      overview,
+      features,
+      installation,
+      servedCustomers,
+      reviews,
+      faqs,
+      storeLocations,
+    },
     { rejectWithValue }
   ) => {
     try {
       const token = localStorage.getItem("adminToken");
 
+      // Map UI shape -> API shape
       const payload = {
-        city: cityName,
-        mobile: contactNumber,
-        email: contactEmail,
+        city,
+        state,
+        mobile,
+        email,
         whatsAppLink: whatsappLink,
+        overview,
+        features,
+        installation,
+        servedCustomers: (servedCustomers || []).map((c) => ({
+          customerName: c.customerName || c.name || "",
+          initials: c.initials || "",
+          serviceDate: c.serviceDate || c.date || "",
+          status: c.status || "",
+          address: c.address || c.fullAddress || "",
+          customerQuery: c.customerQuery || c.query || "",
+        })),
+        reviews: (reviews || []).map((r) => ({
+          customerName: r.customerName || r.name || "",
+          location: r.location || "",
+          rating: r.rating || 0,
+          reviewText: r.reviewText || r.review || "",
+        })),
+        faqs: faqs || [],
+        storeLocations: (storeLocations || []).map((s) => ({
+          storeName: s.storeName || s.name || "",
+          fullAddress: s.fullAddress || s.address || "",
+          openingHours: s.openingHours || s.timing || "",
+        })),
       };
 
-      const res = await axios.post(BASE_URL, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      // Remove empty optional fields so backend doesn't reject
+      Object.keys(payload).forEach((key) => {
+        const val = payload[key];
+        const isEmptyString = typeof val === "string" && val.trim() === "";
+        if (val === undefined || val === null || isEmptyString) {
+          delete payload[key];
+        }
       });
+
+      const res = await axios.post(
+        "https://ro-service-engineer-be-o14k.onrender.com/api/admin/popularCities/addCity",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const item = res.data?.data || res.data;
 
       return {
         id: item._id,
-        cityName: String(item.city || ""),
-        contactNumber: String(item.mobile || ""),
-        contactEmail: String(item.email || ""),
-        whatsappLink: String(item.whatsAppLink || ""),
+        city: String(item.city || ""),
+        state: String(item.state || ""),
+        mobile: String(item.mobile || ""),
+        email: String(item.email || ""),
+        whatsappLink: String(item.whatsappLink || item.whatsAppLink || ""),
+        overview: item.overview || "",
+        features: item.features || "",
+        installation: item.installation || "",
+        servedCustomers: item.servedCustomers || [],
+        reviews: item.reviews || [],
+        faqs: item.faqs || [],
+        storeLocations: item.storeLocations || [],
       };
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data || "Failed to add city"
-      );
+      return rejectWithValue(error.response?.data || "Failed to add city");
     }
   }
 );
@@ -228,4 +285,3 @@ const popularCitiesSlice = createSlice({
 });
 
 export default popularCitiesSlice.reducer;
-
