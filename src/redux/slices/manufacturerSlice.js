@@ -1,7 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "https://ro-service-engineer-be.onrender.com/api/admin/manufacturer";
+const API_URL =
+  "https://ro-service-engineer-be.onrender.com/api/admin/manufacturer";
 
 const authHeaders = () => {
   const token = localStorage.getItem("adminToken");
@@ -83,16 +84,46 @@ export const deleteManufacturer = createAsyncThunk(
 
 export const toggleManufacturerStatus = createAsyncThunk(
   "manufacturer/toggleStatus",
-  async (id, { rejectWithValue, getState }) => {
+  async (id, { rejectWithValue }) => {
     try {
-      const res = await axios.patch(`${API_URL}/toggle-status/${id}`, {}, {
-        headers: authHeaders(),
-      });
-      // Return the updated manufacturer or toggle the status optimistically
+      const res = await axios.patch(
+        `${API_URL}/toggle-status/${id}`,
+        {},
+        {
+          headers: authHeaders(),
+        }
+      );
       const updatedData = res.data?.data || res.data?.manufacturer;
       return { id, data: updatedData };
     } catch (err) {
       return rejectWithValue(err.response?.data || { message: err.message });
+    }
+  }
+);
+
+export const toggleManufacturerVerification = createAsyncThunk(
+  "manufacturer/toggleVerification",
+  async ({ id, action }, { rejectWithValue }) => {
+    try {
+      const res = await axios.patch(
+        `${API_URL}/toggle-verification/${id}/${action}`,
+        {},
+        { headers: authHeaders() }
+      );
+
+      // Normalize possible response shapes from backend
+      const isAccountVerified =
+        res?.data?.data?.isAccountVerified ??
+        res?.data?.isAccountVerified ??
+        res?.data?.data?.manufacturer?.isAccountVerified ??
+        null;
+
+      return {
+        id,
+        isAccountVerified,
+      };
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
@@ -191,30 +222,50 @@ const manufacturerSlice = createSlice({
         state.loading = false;
         const id = action.payload?.id;
         const data = action.payload?.data;
-        
-        // If API returned updated data, use it; otherwise toggle status locally
+
         if (id && state.current && state.current._id === id) {
           if (data && Object.keys(data).length > 0) {
             state.current = { ...state.current, ...data };
           } else {
-            // Fallback: toggle status manually if API doesn't return full data
-            const newStatus = state.current.status === 'active' ? 'inactive' : 'active';
+            const newStatus =
+              state.current.status === "active" ? "inactive" : "active";
             state.current = { ...state.current, status: newStatus };
           }
         }
-        
-        // Update in list
+
         const idx = state.list.findIndex((m) => m._id === id);
         if (idx !== -1) {
           if (data && Object.keys(data).length > 0) {
             state.list[idx] = { ...state.list[idx], ...data };
           } else {
-            const newStatus = state.list[idx].status === 'active' ? 'inactive' : 'active';
+            const newStatus =
+              state.list[idx].status === "active" ? "inactive" : "active";
             state.list[idx] = { ...state.list[idx], status: newStatus };
           }
         }
       })
       .addCase(toggleManufacturerStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error;
+      })
+      // toggle verification
+      .addCase(toggleManufacturerVerification.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(toggleManufacturerVerification.fulfilled, (state, action) => {
+        state.loading = false;
+        const { id, isAccountVerified } = action.payload;
+
+        if (state.current && state.current._id === id) {
+          state.current.isAccountVerified = isAccountVerified;
+        }
+
+        const idx = state.list.findIndex((m) => m._id === id);
+        if (idx !== -1) {
+          state.list[idx].isAccountVerified = isAccountVerified;
+        }
+      })
+      .addCase(toggleManufacturerVerification.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error;
       });
