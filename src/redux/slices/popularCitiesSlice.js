@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const BASE_URL =
-  "https://ro-service-engineer-be.onrender.com/api/admin/popularCities";
+  "https://ro-service-engineer-be-o14k.onrender.com/api/admin/popularCities";
 
 
 
@@ -15,7 +15,7 @@ export const fetchPopularCities = createAsyncThunk(
     try {
       const token = localStorage.getItem("adminToken");
 
-      const res = await axios.get(BASE_URL, {
+      const res = await axios.get(`${BASE_URL}/getAllCities`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -24,10 +24,22 @@ export const fetchPopularCities = createAsyncThunk(
       // Backend → Frontend mapping
       return (res.data?.cities || []).map((item) => ({
         id: item._id,
-        cityName: item.city,
-        contactNumber: item.mobile,
-        contactEmail: item.email,
-        whatsappLink: item.whatsAppLink,
+        city: item.city || "",
+        cityName: item.city || "", // backward compatibility
+        state: item.state || "",
+        stateName: item.state || "", // optional legacy naming
+        mobile: item.mobile || "",
+        contactNumber: item.mobile || "", // backward compatibility
+        email: item.email || "",
+        contactEmail: item.email || "", // backward compatibility
+        whatsappLink: item.whatsappLink || item.whatsAppLink || "",
+        overview: item.overview || "",
+        features: item.features || "",
+        installation: item.installation || "",
+        servedCustomers: item.servedCustomers || [],
+        reviews: item.reviews || [],
+        faqs: item.faqs || [],
+        storeLocations: item.storeLocations || [],
       }));
     } catch (error) {
       return rejectWithValue(
@@ -103,15 +115,11 @@ export const addPopularCity = createAsyncThunk(
         }
       });
 
-      const res = await axios.post(
-        "https://ro-service-engineer-be-o14k.onrender.com/api/admin/popularCities/addCity",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await axios.post(`${BASE_URL}/addCity`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const item = res.data?.data || res.data;
 
@@ -146,7 +154,7 @@ export const deletePopularCity = createAsyncThunk(
     try {
       const token = localStorage.getItem("adminToken");
 
-      await axios.delete(`${BASE_URL}/${id}`, {
+      await axios.delete(`${BASE_URL}/deleteCityById/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -168,20 +176,67 @@ export const deletePopularCity = createAsyncThunk(
 export const updatePopularCity = createAsyncThunk(
   "popularCities/update",
   async (
-    { id, cityName, contactNumber, contactEmail, whatsappLink },
+    {
+      id,
+      city,
+      state,
+      mobile,
+      email,
+      whatsappLink,
+      overview,
+      features,
+      installation,
+      servedCustomers,
+      reviews,
+      faqs,
+      storeLocations,
+    },
     { rejectWithValue }
   ) => {
     try {
       const token = localStorage.getItem("adminToken");
 
       const payload = {
-        city: cityName,
-        mobile: contactNumber,
-        email: contactEmail,
+        city,
+        state,
+        mobile,
+        email,
         whatsAppLink: whatsappLink,
+        overview,
+        features,
+        installation,
+        servedCustomers: (servedCustomers || []).map((c) => ({
+          customerName: c.customerName || c.name || "",
+          initials: c.initials || "",
+          serviceDate: c.serviceDate || c.date || "",
+          status: c.status || "",
+          address: c.address || c.fullAddress || "",
+          customerQuery: c.customerQuery || c.query || "",
+        })),
+        reviews: (reviews || []).map((r) => ({
+          customerName: r.customerName || r.name || "",
+          location: r.location || "",
+          rating: r.rating || 0,
+          reviewText: r.reviewText || r.review || "",
+        })),
+        faqs: faqs || [],
+        storeLocations: (storeLocations || []).map((s) => ({
+          storeName: s.storeName || s.name || "",
+          fullAddress: s.fullAddress || s.address || "",
+          openingHours: s.openingHours || s.timing || "",
+        })),
       };
 
-      const res = await axios.put(`${BASE_URL}/${id}`, payload, {
+      // Remove empty optional fields
+      Object.keys(payload).forEach((key) => {
+        const val = payload[key];
+        const isEmptyString = typeof val === "string" && val.trim() === "";
+        if (val === undefined || val === null || isEmptyString) {
+          delete payload[key];
+        }
+      });
+
+      const res = await axios.put(`${BASE_URL}/updateCityById/${id}`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -192,10 +247,22 @@ export const updatePopularCity = createAsyncThunk(
       // Map backend → frontend
       return {
         id: item._id,
-        cityName: item.city,
-        contactNumber: item.mobile,
-        contactEmail: item.email,
-        whatsappLink: item.whatsAppLink,
+        city: item.city || "",
+        cityName: item.city || "", // backward compatibility
+        state: item.state || "",
+        stateName: item.state || "",
+        mobile: item.mobile || "",
+        contactNumber: item.mobile || "",
+        email: item.email || "",
+        contactEmail: item.email || "",
+        whatsappLink: item.whatsAppLink || item.whatsappLink || "",
+        overview: item.overview || "",
+        features: item.features || "",
+        installation: item.installation || "",
+        servedCustomers: item.servedCustomers || [],
+        reviews: item.reviews || [],
+        faqs: item.faqs || [],
+        storeLocations: item.storeLocations || [],
       };
     } catch (error) {
       return rejectWithValue(

@@ -67,6 +67,11 @@ const Header2 = ({ title }) => {
     "/messages/:id": "Message",
 
     "/popular-cities": "RO Care Popular Cities",
+    "/popular-cities/add-new-city": "Add New City",
+    "/popular-cities/edit-city": "Edit City",
+    "/popular-cities/edit-city/:id": "Edit City",
+    "/popular-cities/view-city": "City Details",
+    "/popular-cities/view-city/:id": "City Details",
   };
 
   const getLabel = (path) => {

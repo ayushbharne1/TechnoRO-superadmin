@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 import { FaRegEdit } from "react-icons/fa";
+import { Eye } from "lucide-react";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -197,8 +198,18 @@ const PopularCities = () => {
                     {String(row.contactEmail || "")}
                   </td>
 
-                  <td className="p-3 flex justify-center gap-2">
+                  <td className="p-3 flex justify-center gap-3">
+                    <Eye
+                      size={22}
+                      className="text-[#0088FF] cursor-pointer"
+                      onClick={() =>
+                        navigate(`/popular-cities/view-city/${row.id}`, {
+                          state: { city: row },
+                        })
+                      }
+                    />
                     <FaRegEdit
+                      size={22}
                       className="text-[#0088FF] cursor-pointer"
                       onClick={() =>
                         navigate(`/popular-cities/edit-city/${row.id}`, {
@@ -207,6 +218,7 @@ const PopularCities = () => {
                       }
                     />
                     <RiDeleteBinLine
+                      size={22}
                       className="text-[#FF383C] cursor-pointer"
                       onClick={() => {
                         setSelectedCity(row);
@@ -752,6 +764,3 @@ export default PopularCities;
 // };
 
 // export default PopularCities;
-
-
-

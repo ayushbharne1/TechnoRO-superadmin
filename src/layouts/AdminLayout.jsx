@@ -120,8 +120,9 @@ import StartNewChat from "../pages/modules/Message/StartNewChat";
 import ChatPage from "../pages/modules/Message/ChatPage";
 
 import PopularCities from "../pages/modules/PopularCities/Popularcities";
-import AddCity from "../pages/modules/PopularCities/AddCity"; 
+import AddCity from "../pages/modules/PopularCities/AddCity";
 import EditCity from "../pages/modules/PopularCities/EditCity";
+import PopularCityDetails from "../pages/modules/PopularCities/PopularCityDetails";
 
 const AdminLayout = () => {
   const [loading, setLoading] = useState(true);
@@ -330,6 +331,7 @@ const AdminLayout = () => {
               <Route path="/popular-cities" element={<PopularCities />} />    
               <Route path="/popular-cities/add-new-city" element={<AddCity />} />
               <Route path="/popular-cities/edit-city/:id" element={<EditCity />} />
+              <Route path="/popular-cities/view-city/:id" element={<PopularCityDetails />} />
                     
             </Routes>
             </div>
