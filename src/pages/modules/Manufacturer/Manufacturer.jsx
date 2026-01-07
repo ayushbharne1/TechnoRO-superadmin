@@ -116,7 +116,7 @@ const Manufacturer = () => {
         </div>
       </div>
       <div className="bg-white p-4 w-full rounded-lg shadow overflow-x-auto">
-        <table className="table-auto w-full border border-gray-400 min-w-[600px] sm:min-w-[700px]">
+        <table className="table-auto w-full border border-gray-400 min-w-[600px] sm:min-w-[800px]">
           <thead>
             <tr className="bg-[#F3F4F6] text-center text-base sm:text-xl">
               <th className="h-[60px] font-poppins font-medium text-[14px] sm:text-[18px] text-black">
@@ -131,6 +131,9 @@ const Manufacturer = () => {
               <th className="p-3 font-poppins font-medium text-[14px] sm:text-[18px] text-black hidden sm:table-cell">
                 Email
               </th>
+              <th className="p-3 font-poppins font-medium text-[14px] sm:text-[18px] text-black hidden md:table-cell">
+                Account Status
+              </th>
               <th className="p-3 font-poppins font-medium text-[14px] sm:text-[18px] text-black hidden lg:table-cell">
                 Address
               </th>
@@ -142,7 +145,7 @@ const Manufacturer = () => {
           <tbody className="text-center">
             {isLoading ? (
               <tr>
-                <td colSpan="6" className="p-6 text-center">
+                <td colSpan="7" className="p-6 text-center">
                   Loading...
                 </td>
               </tr>
@@ -158,6 +161,19 @@ const Manufacturer = () => {
                   <td className="p-3">{row.name}</td>
                   <td className="p-3">{row.phone}</td>
                   <td className="p-3 hidden sm:table-cell">{row.email}</td>
+                  <td className="p-3 hidden md:table-cell">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        row.verificationStatus === "verified"
+                          ? "bg-green-100 text-green-700"
+                          : row.verificationStatus === "pending"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {row.verificationStatus === "verified" ? "Verified" : row.verificationStatus === "pending" ? "Pending" : "Unverified"}
+                    </span>
+                  </td>
                   <td className="p-3 hidden lg:table-cell">{row.address}</td>
                   <td className="p-3 flex gap-2 justify-center flex-wrap">
                     <button
@@ -187,7 +203,7 @@ const Manufacturer = () => {
             )}
             {!isLoading && paginatedRows.length === 0 && (
               <tr>
-                <td colSpan="6" className="p-6 text-center">
+                <td colSpan="7" className="p-6 text-center">
                   No manufacturers found.
                 </td>
               </tr>

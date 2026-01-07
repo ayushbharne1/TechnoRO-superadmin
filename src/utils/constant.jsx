@@ -97,7 +97,7 @@ export const sidebarItems = [
       },
           {
         id: 2,
-        name: "RO Service Popular Cities",
+        name: "Popular Cities",
         icon: <FaMapLocationDot />,
         path: "/popular-cities",
       },
