@@ -149,7 +149,7 @@ const AdminLayout = () => {
         {!isAuthPage && <Header />}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto bg-white">
+        <main className="flex-1 overflow-auto bg-[#eef5f3]">
           <ResponsiveLayout>
             <div className="w-full h-full">
               <Routes>

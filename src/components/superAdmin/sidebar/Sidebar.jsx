@@ -48,7 +48,7 @@ const Sidebar = () => {
       {/* Logo - Fixed at top */}
       <div className="ml-2 border-b-2 border-gray-300 flex justify-center items-center flex-shrink-0 sticky top-0 bg-white z-10 py-4 md:border-b-2 md:border-gray-400">
         <img
-          className="w-[136px] h-[72px] object-cover"
+          className="w-[100px] h-[4.9vh] object-cover"
           src={logo}
           alt="logo"
         />

@@ -4,12 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchManufacturerById,
   toggleManufacturerStatus,
+  toggleManufacturerVerification,
 } from "../../../redux/slices/manufacturerSlice";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Eye } from "lucide-react";
+import { Eye, CheckCircle, XCircle } from "lucide-react";
 
 /* -------------------- DUMMY DATA -------------------- */
 const stats = [
@@ -54,6 +55,28 @@ const ViewManufacturer = () => {
     }
   };
 
+  const handleVerification = async (action) => {
+    // action should be 'verified' or 'unverified' (backend uses verificationStatus)
+    const actionText = action === "verified" ? "verify" : "mark as unverified";
+    if (!window.confirm(`Are you sure you want to ${actionText} this manufacturer's verification?`)) {
+      return;
+    }
+
+    try {
+      await dispatch(toggleManufacturerVerification({ id, action })).unwrap();
+      alert(`Manufacturer verification ${action === "verified" ? "verified" : "set to unverified"} successfully!`);
+      dispatch(fetchManufacturerById(id)); // Refresh the data
+    } catch (error) {
+      // show full error payload if message missing to help debugging
+      const msg =
+        (error && (error.message || error.msg || error.error)) ||
+        (typeof error === "string" ? error : null) ||
+        JSON.stringify(error) ||
+        "Failed to update verification status";
+      alert(msg);
+    }
+  }; 
+
   const markerIcon = new L.Icon({
     iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
     shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -80,9 +103,30 @@ const ViewManufacturer = () => {
       <div className="bg-white rounded-lg p-6 space-y-6">
         {/* Title + Status */}
         <div className="flex justify-between items-center">
-          <h2 className="text-3xl font-bold text-[#263138]">
-            {manufacturer.name}
-          </h2>
+          <div>
+            <h2 className="text-3xl font-bold text-[#263138]">
+              {manufacturer.name}
+            </h2>
+            <div className="mt-2">
+              <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold ${
+                manufacturer.isAccountVerified 
+                  ? "bg-green-100 text-green-700" 
+                  : "bg-yellow-100 text-yellow-700"
+              }`}>
+                {manufacturer.isAccountVerified ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Account Verified
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-4 h-4" />
+                    Account Not Verified
+                  </>
+                )}
+              </span>
+            </div>
+          </div>
 
           <div>
             <div className="font-medium text-[#263138]">Active Status</div>
@@ -244,6 +288,28 @@ const ViewManufacturer = () => {
             </div>
           </div>
         </div>
+
+        {/* Verification Buttons - Show only if not verified */}
+        {!manufacturer.isAccountVerified && (
+          <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
+            <button
+              onClick={() => handleVerification("unverified")}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+            >
+              <XCircle className="w-5 h-5" />
+              Reject Verification
+            </button>
+            <button
+              onClick={() => handleVerification("verified")}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+            >
+              <CheckCircle className="w-5 h-5" />
+              Verify Account
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
