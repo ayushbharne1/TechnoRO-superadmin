@@ -70,7 +70,7 @@ const EditEngineer = () => {
   };
 
   return (
-    <div className=" min-h-screen flex flex-col">
+    <div className=" min-h-screen flex flex-col bg-white p-4">
       <Header2 title="Edit Service Engineer Details"/>
 
       <div className=" p-6  flex flex-col gap-8 w-full h-full">

@@ -9,7 +9,11 @@ import { FiPhone, FiSearch } from "react-icons/fi";
 import { HiOutlineLockClosed } from "react-icons/hi";
 
 import { useDispatch, useSelector } from "react-redux";
-import { getServiceEngineerById } from "../../../redux/slices/serviceEngineerSlice";
+import {
+  getServiceEngineerById,
+  toggleServiceEngineerVerification,
+} from "../../../redux/slices/serviceEngineerSlice";
+import { CheckCircle, XCircle } from "lucide-react";
 
 const ViewEngineer = () => {
   const location = useLocation();
@@ -31,9 +35,7 @@ const ViewEngineer = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
 
-  const { currentEngineer } = useSelector(
-    (state) => state.serviceEngineer
-  );
+  const { currentEngineer } = useSelector((state) => state.serviceEngineer);
 
   useEffect(() => {
     if (id) {
@@ -49,15 +51,99 @@ const ViewEngineer = () => {
     // password: "********",
   };
 
+  const handleVerification = async (action) => {
+    const actionText = action === "verified" ? "verify" : "reject";
+    if (
+      !window.confirm(`Are you sure you want to ${actionText} this engineer?`)
+    ) {
+      return;
+    }
+    try {
+      await dispatch(
+        toggleServiceEngineerVerification({ id: finalEngineer._id, action })
+      ).unwrap();
+      alert(
+        `Engineer verification ${
+          action === "verified" ? "verified" : "rejected"
+        } successfully!`
+      );
+      dispatch(getServiceEngineerById(id)); // Refresh the data
+    } catch (error) {
+      // show full error payload if message missing to help debugging
+      const msg =
+        (error && (error.message || error.msg || error.error)) ||
+        (typeof error === "string" ? error : null) ||
+        JSON.stringify(error) ||
+        "Failed to update verification status";
+      alert(msg);
+    }
+  };
+
   const assignedLeads = [
-    { id: "L001", customerName: "Ajay Kumar", serviceType: "Repair", productModel: "Model A", orderDate: "2025-10-10", status: "Assigned" },
-    { id: "L002", customerName: "Ramesh Sharma", serviceType: "Installation", productModel: "Model B", orderDate: "2025-10-11", status: "In Progress" },
-    { id: "L003", customerName: "Sita Devi", serviceType: "Maintenance", productModel: "Model C", orderDate: "2025-10-12", status: "Completed" },
-    { id: "L004", customerName: "Vijay Singh", serviceType: "Repair", productModel: "Model D", orderDate: "2025-10-13", status: "Accepted" },
-    { id: "L005", customerName: "Anita Rao", serviceType: "Installation", productModel: "Model E", orderDate: "2025-10-14", status: "Assigned" },
-    { id: "L006", customerName: "Rahul Verma", serviceType: "Maintenance", productModel: "Model F", orderDate: "2025-10-15", status: "In Progress" },
-    { id: "L007", customerName: "Priya Singh", serviceType: "Repair", productModel: "Model G", orderDate: "2025-10-16", status: "Completed" },
-    { id: "L008", customerName: "Karan Patel", serviceType: "Installation", productModel: "Model H", orderDate: "2025-10-17", status: "Accepted" },
+    {
+      id: "L001",
+      customerName: "Ajay Kumar",
+      serviceType: "Repair",
+      productModel: "Model A",
+      orderDate: "2025-10-10",
+      status: "Assigned",
+    },
+    {
+      id: "L002",
+      customerName: "Ramesh Sharma",
+      serviceType: "Installation",
+      productModel: "Model B",
+      orderDate: "2025-10-11",
+      status: "In Progress",
+    },
+    {
+      id: "L003",
+      customerName: "Sita Devi",
+      serviceType: "Maintenance",
+      productModel: "Model C",
+      orderDate: "2025-10-12",
+      status: "Completed",
+    },
+    {
+      id: "L004",
+      customerName: "Vijay Singh",
+      serviceType: "Repair",
+      productModel: "Model D",
+      orderDate: "2025-10-13",
+      status: "Accepted",
+    },
+    {
+      id: "L005",
+      customerName: "Anita Rao",
+      serviceType: "Installation",
+      productModel: "Model E",
+      orderDate: "2025-10-14",
+      status: "Assigned",
+    },
+    {
+      id: "L006",
+      customerName: "Rahul Verma",
+      serviceType: "Maintenance",
+      productModel: "Model F",
+      orderDate: "2025-10-15",
+      status: "In Progress",
+    },
+    {
+      id: "L007",
+      customerName: "Priya Singh",
+      serviceType: "Repair",
+      productModel: "Model G",
+      orderDate: "2025-10-16",
+      status: "Completed",
+    },
+    {
+      id: "L008",
+      customerName: "Karan Patel",
+      serviceType: "Installation",
+      productModel: "Model H",
+      orderDate: "2025-10-17",
+      status: "Accepted",
+    },
   ];
 
   const [active, setActive] = useState(engineer.isActive ?? true);
@@ -141,13 +227,39 @@ const ViewEngineer = () => {
                 {engineer.name}
               </h2>
               <span
-                className={`text-white text-sm font-semibold px-4 py-1 rounded-full  -mt-5 ${active ? "bg-[#24A148]" : "bg-red-600"
-                  }`}
+                className={`text-white text-sm font-semibold px-4 py-1 rounded-full  -mt-5 ${
+                  active ? "bg-[#24A148]" : "bg-red-600"
+                }`}
               >
                 {active ? "Available" : "Inactive"}
               </span>
             </div>
-
+            <div className="mt-2">
+              <span
+                className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold ${
+                  engineer.verificationStatus === "verified"
+                    ? "bg-green-100 text-green-700"
+                    : engineer.verificationStatus === "pending" ? "bg-yellow-100 text-yellow-700" :  "bg-red-100 text-red-700"
+                }`}
+              >
+                {engineer.verificationStatus === "verified" ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Account Verified
+                  </>
+                ) : engineer.verificationStatus === "pending" ? (
+                  <>
+                    <XCircle className="w-4 h-4" />
+                    Account Verification Pending
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-4 h-4" />
+                    Account Verification Rejected
+                  </>
+                )}
+              </span>
+            </div>
             {/* Assigned Area (top of left column) */}
             <div className="flex items-start gap-2">
               <IoLocationSharp className="w-5 h-5 text-[#7EC1B1] mt-[2px]" />
@@ -187,7 +299,6 @@ const ViewEngineer = () => {
               />
             </label>
           </div>
-
         </div>
 
         {/* TWO-COLUMN LAYOUT: left = map, right = skill/phone/password */}
@@ -216,9 +327,7 @@ const ViewEngineer = () => {
             <div className="flex items-start gap-3">
               <PiBuildingOfficeLight className="w-6 h-6 text-[#7EC1B1] mt-1" />
               <div>
-                <span className="font-medium text-lg text-gray-700">
-                  Skill
-                </span>
+                <span className="font-medium text-lg text-gray-700">Skill</span>
                 <p className="text-xl font-normal text-[#7EC1B1]">
                   {finalEngineer.skill}
                 </p>
@@ -361,8 +470,6 @@ const ViewEngineer = () => {
           Assigned Leads
         </h2>
 
-
-
         {/* Top Controls */}
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -430,10 +537,7 @@ const ViewEngineer = () => {
             <tbody>
               {paginatedLeads.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={8}
-                    className="text-center p-6 text-gray-500"
-                  >
+                  <td colSpan={8} className="text-center p-6 text-gray-500">
                     No leads match your criteria.
                   </td>
                 </tr>
@@ -441,15 +545,12 @@ const ViewEngineer = () => {
                 paginatedLeads.map((lead, idx) => (
                   <tr
                     key={lead.id}
-                    className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50"
-                      } text-gray-800 hover:bg-blue-50 transition`}
+                    className={`${
+                      idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } text-gray-800 hover:bg-blue-50 transition`}
                   >
-                    <td className="p-3 text-center align-middle">
-                      {idx + 1}
-                    </td>
-                    <td className="p-3 text-center align-middle">
-                      {lead.id}
-                    </td>
+                    <td className="p-3 text-center align-middle">{idx + 1}</td>
+                    <td className="p-3 text-center align-middle">{lead.id}</td>
                     <td className="p-3 text-center align-middle">
                       {lead.customerName}
                     </td>
@@ -531,9 +632,7 @@ const ViewEngineer = () => {
                 <div className="flex justify-end pt-2 border-t mt-2">
                   <GoEye
                     className="text-blue-600 w-6 h-6 cursor-pointer hover:text-blue-800 transition"
-                    onClick={() =>
-                      console.log("View Lead Details:", lead.id)
-                    }
+                    onClick={() => console.log("View Lead Details:", lead.id)}
                   />
                 </div>
               </div>
@@ -541,12 +640,31 @@ const ViewEngineer = () => {
           )}
         </div>
       </div>
+
+      {/* Verification Buttons - Show only if not verified */}
+      {finalEngineer.verificationStatus === "pending" && (
+        <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
+          <button
+            onClick={() => handleVerification("rejected")}
+            className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+          >
+            <XCircle className="w-5 h-5" />
+            Reject Verification
+          </button>
+          <button
+            onClick={() => handleVerification("verified")}
+            className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+          >
+            <CheckCircle className="w-5 h-5" />
+            Verify Account
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 export default ViewEngineer;
-
 
 // Sir
 // import { useState } from "react";
@@ -988,7 +1106,7 @@ export default ViewEngineer;
 
 // export default ViewEngineer;
 
-// Sir Final > saumya redux working 
+// Sir Final > saumya redux working
 // import { useEffect, useState } from "react";
 // import { useLocation, useNavigate, useParams } from "react-router-dom";
 // import Header2 from "../../../components/superAdmin/header/Header2";
@@ -999,19 +1117,15 @@ export default ViewEngineer;
 // import { FiSearch } from "react-icons/fi"; // Search icon for consistency
 // import { HiOutlineLockClosed } from "react-icons/hi"; // Lock icon for password
 
-// // 
+// //
 // import { useDispatch, useSelector } from "react-redux";
 // import { getServiceEngineerById } from "../../../redux/slices/serviceEngineerSlice";
 
-// // 
-
-
+// //
 
 // const ViewEngineer = () => {
 //     const location = useLocation();
 //     const navigate = useNavigate(); // Hook for navigation
-
-
 
 //     // Placeholder data structure for demonstration (Used for clean initial state if location.state is missing)
 //     // for change
@@ -1029,7 +1143,6 @@ export default ViewEngineer;
 //     // // Use actual engineer data or the placeholder if state is empty
 //     const engineer = location.state?.engineer || engineerPlaceholder;
 
-
 //     // changes for redux
 //     const dispatch = useDispatch();
 //     const { id } = useParams();
@@ -1043,9 +1156,6 @@ export default ViewEngineer;
 //         }
 //     }, [dispatch, id]);
 
-
-
-
 //     const finalEngineer = {
 //         ...engineer,
 //         assignedArea: currentEngineer?.assignedArea || engineer.assignedArea,
@@ -1054,9 +1164,7 @@ export default ViewEngineer;
 //         password: "********", // never show real password
 //     };
 
-
-// // 
-
+// //
 
 //     const assignedLeads = [
 //         { id: "L001", customerName: "Ajay Kumar", serviceType: "Repair", productModel: "Model A", orderDate: "2025-10-10", status: "Assigned" },
@@ -1068,9 +1176,6 @@ export default ViewEngineer;
 //         { id: "L007", customerName: "Priya Singh", serviceType: "Repair", productModel: "Model G", orderDate: "2025-10-16", status: "Completed" },
 //         { id: "L008", customerName: "Karan Patel", serviceType: "Installation", productModel: "Model H", orderDate: "2025-10-17", status: "Accepted" },
 //     ];
-
-
-
 
 //     const [active, setActive] = useState(engineer.isActive ?? true);
 //     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -1088,7 +1193,6 @@ export default ViewEngineer;
 
 //     // const successRate = totalLeads === 0 ? 0 : Math.round(((totalLeads - leadsRejected) / totalLeads) * 100); // Kept commented as per original
 
-
 //     const filteredLeads = assignedLeads.filter(
 //         (lead) =>
 //             (lead.customerName.toLowerCase().includes(search.toLowerCase()) ||
@@ -1097,7 +1201,6 @@ export default ViewEngineer;
 //     );
 
 //     const paginatedLeads = filteredLeads.slice(0, rowsPerPage);
-
 
 //     // Helper function for status colors (matching the previous component's style)
 //     const getStatusColor = (status) => {
@@ -1254,7 +1357,6 @@ export default ViewEngineer;
 //                                         {/* {showPassword ? engineer.password : "••••••••"} */}
 //                                         {showPassword ? finalEngineer.password : "••••••••"}
 
-
 //                                     </p>
 //                                     <button
 //                                         type="button"
@@ -1264,14 +1366,12 @@ export default ViewEngineer;
 //                                     >
 //                                         {/*  */}
 
-
 //                                         {/*  */}
 
 //                                     </button>
 //                                 </div>
 //                             </div>
 //                         </div>
-
 
 //                     </div>
 //                 </div>
@@ -1512,8 +1612,3 @@ export default ViewEngineer;
 // };
 
 // export default ViewEngineer;
-
-
-
-
-
