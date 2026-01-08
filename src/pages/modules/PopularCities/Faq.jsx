@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 
-export default function Faq() {
-  const [faqs, setFaqs] = useState([
-  ]);
+export default function Faq({ faqs = [], setFaqs = () => {} }) {
   const [newQuestion, setNewQuestion] = useState('');
   const [newAnswer, setNewAnswer] = useState('');
+
+  // Ensure local re-render when parent changes faqs (for display only)
+  useEffect(() => {
+    // no-op; relies on parent props; useEffect to acknowledge prop change
+  }, [faqs]);
 
   const addFAQ = () => {
     if (newQuestion.trim() && newAnswer.trim()) {
@@ -14,14 +17,14 @@ export default function Faq() {
         question: newQuestion,
         answer: newAnswer
       };
-      setFaqs([...faqs, newFAQ]);
+      setFaqs([...(faqs || []), newFAQ]);
       setNewQuestion('');
       setNewAnswer('');
     }
   };
 
   const deleteFAQ = (id) => {
-    setFaqs(faqs.filter(faq => faq.id !== id));
+    setFaqs((faqs || []).filter(faq => faq.id !== id));
   };
 
   return (
