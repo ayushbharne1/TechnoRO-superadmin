@@ -44,6 +44,7 @@ const EditCity = () => {
   // Loading and error states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // Separate refs for each editor
   const overviewRef = React.useRef(null);
@@ -99,7 +100,10 @@ const EditCity = () => {
      Prefill form on mount
   ========================= */
   useEffect(() => {
-    if (!prefill) return;
+    if (!prefill) {
+      setDataLoaded(false);
+      return;
+    }
 
     // Normalize keys from different sources
     const normCity = prefill.city || prefill.cityName || "";
@@ -121,6 +125,7 @@ const EditCity = () => {
     setReviews(prefill.reviews || []);
     setFaqs(prefill.faqs || []);
     setStoreLocations(prefill.storeLocations || []);
+    setDataLoaded(true);
   }, [prefill]);
 
   const handleUpdate = async () => {
@@ -257,15 +262,16 @@ const EditCity = () => {
             Overview
           </label>
           <div className="border border-gray-300 rounded-lg overflow-hidden">
-            <JoditEditor
-              key={(selectedId || "new") + "-overview"}
-              ref={overviewRef}
-              defaultValue={overview}
-              config={editorConfig}
-              tabIndex={1}
-              onBlur={(newContent) => setOverview(newContent)}
-              onChange={() => {}}
-            />
+            {dataLoaded && overview !== undefined && (
+              <JoditEditor
+                key={`${selectedId}-overview-${overview.length}`}
+                ref={overviewRef}
+                value={overview}
+                config={editorConfig}
+                tabIndex={1}
+                onBlur={(newContent) => setOverview(newContent)}
+              />
+            )}
           </div>
         </div>
 
@@ -275,15 +281,16 @@ const EditCity = () => {
             Features
           </label>
           <div className="border border-gray-300 rounded-lg overflow-hidden">
-            <JoditEditor
-              key={(selectedId || "new") + "-features"}
-              ref={featuresRef}
-              defaultValue={features}
-              config={editorConfig}
-              tabIndex={2}
-              onBlur={(newContent) => setFeatures(newContent)}
-              onChange={() => {}}
-            />
+            {dataLoaded && features !== undefined && (
+              <JoditEditor
+                key={selectedId + "-features"}
+                ref={featuresRef}
+                value={features}
+                config={editorConfig}
+                tabIndex={2}
+                onBlur={(newContent) => setFeatures(newContent)}
+              />
+            )}
           </div>
         </div>
 
@@ -293,15 +300,16 @@ const EditCity = () => {
             Installation
           </label>
           <div className="border border-gray-300 rounded-lg overflow-hidden">
-            <JoditEditor
-              key={(selectedId || "new") + "-installation"}
-              ref={installationRef}
-              defaultValue={installation}
-              config={editorConfig}
-              tabIndex={3}
-              onBlur={(newContent) => setInstallation(newContent)}
-              onChange={() => {}}
-            />
+            {dataLoaded && installation !== undefined && (
+              <JoditEditor
+                key={selectedId + "-installation"}
+                ref={installationRef}
+                value={installation}
+                config={editorConfig}
+                tabIndex={3}
+                onBlur={(newContent) => setInstallation(newContent)}
+              />
+            )}
           </div>
         </div>
 
