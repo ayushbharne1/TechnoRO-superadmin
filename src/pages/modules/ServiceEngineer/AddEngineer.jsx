@@ -45,7 +45,7 @@ const AddEngineer = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen flex flex-col">
+    <div className="bg-white p-4 min-h-screen flex flex-col">
       <Header2 title="Add Service Engineer" />
 
       <div className=" p-6  flex flex-col gap-8 w-full h-full">

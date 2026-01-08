@@ -4,9 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchVendorById, toggleVendorStatus } from "../../../redux/slices/vendorSlice";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import { FiPhone } from "react-icons/fi";
-import { Eye } from "lucide-react";
+import { CheckCircle, Eye, XCircle } from "lucide-react";
 import CompanyIcon from "../../../assets/company.svg";
 import AddressIcon from "../../../assets/Location.svg";
+import { toggleVendorVerification } from "../../../redux/slices/vendorSlice";
 
 const VendorDetails = () => {
   const { id } = useParams();
@@ -32,6 +33,25 @@ const VendorDetails = () => {
       alert("Failed to update status");
     }
   };
+  const handleVerification = async (action) =>{
+       const actionText = action === "verified" ? "verify" : "mark as unverified";
+    if (!window.confirm(`Are you sure you want to ${actionText} this Vendor's verification?`)) {
+      return;
+    }
+    try {
+      await dispatch(toggleVendorVerification({ id, action })).unwrap();
+      alert(`Vendor verification ${action === "verified" ? "verified" : "set to unverified"} successfully!`);
+      dispatch(fetchVendorById(id)); // Refresh the data
+    } catch (error) {
+      // show full error payload if message missing to help debugging
+      const msg =
+        (error && (error.message || error.msg || error.error)) ||
+        (typeof error === "string" ? error : null) ||
+        JSON.stringify(error) ||
+        "Failed to update verification status";
+      alert(msg);
+    }
+  }
 
   /* -------------------- DUMMY DATA (SAFE) -------------------- */
   const stats = [
@@ -65,7 +85,32 @@ const VendorDetails = () => {
       <div className="bg-white rounded-lg p-6 space-y-6">
 
         <div className="flex justify-between items-start">
-          <h2 className="text-3xl font-bold text-[#263138]">{vendor.name}</h2>
+          <div>
+            <h2 className="text-3xl font-bold text-[#263138]">{vendor.name}</h2>
+             <div className="mt-2">
+              <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold ${
+                vendor.verificationStatus === "verified"
+                  ? "bg-green-100 text-green-700" 
+                  : vendor.verificationStatus === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
+              }`}>
+                {vendor.verificationStatus === "verified" ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Account Verified
+                  </>
+                ) : vendor.verificationStatus === "pending" ? (
+                  <>
+                    <XCircle className="w-4 h-4" />
+                    Pending Verification
+                  </>
+                ) : (<>
+                    <XCircle className="w-4 h-4" />
+                    Not Verified
+                  </>
+                )}
+              </span>
+            </div>
+          </div>
 
           <div className="flex items-center gap-3">
             <span className="font-medium">Active Status</span>
@@ -202,6 +247,30 @@ const VendorDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* =================== Account verification button =================== */}
+      { vendor.verificationStatus === "pending"  && (
+       <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
+            <button
+              onClick={() => handleVerification("rejected")}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+            >
+              <XCircle className="w-5 h-5" />
+              Reject Verification
+            </button>
+            <button
+              onClick={() => handleVerification("verified")}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+            >
+              <CheckCircle className="w-5 h-5" />
+              Verify Account
+            </button>
+          </div> ) 
+         
+      }
+      
     </div>
   );
 };

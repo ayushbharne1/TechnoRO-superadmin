@@ -293,7 +293,7 @@ const ViewManufacturer = () => {
         {!manufacturer.isAccountVerified && (
           <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
             <button
-              onClick={() => handleVerification("unverified")}
+              onClick={() => handleVerification("rejected")}
               disabled={loading}
               className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >

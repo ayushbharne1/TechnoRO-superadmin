@@ -87,6 +87,7 @@ const Vendor = () => {
                 <th className="p-3 font-poppins font-medium text-[18px]">Company</th>
                 <th className="p-3 font-poppins font-medium text-[18px]">Phone Number</th>
                 <th className="p-3 font-poppins font-medium text-[18px]">Address</th>
+                <th className="p-3 font-poppins font-medium text-[18px]">Account Status</th>
                 <th className="p-3 font-poppins font-medium text-[18px]">Action</th>
               </tr>
             </thead>
@@ -97,7 +98,8 @@ const Vendor = () => {
                   <td className="p-3 font-poppins font-normal capitalize">{row.name}</td>
                   <td className="p-3 font-poppins font-normal">{row.companyName}</td>
                   <td className="p-3 font-poppins font-normal">{row.mobile || row.phone}</td>
-                  <td className="p-3 font-poppins font-normal">{row.address}</td>
+                  <td className="p-3 font-poppins font-normal">{row.address || "-"}</td>
+                    <td className={`p-1 font-poppins font-normal ${row.verificationStatus === "verified" ? "text-green-500" : row.verificationStatus === "pending" ? "text-yellow-500" : "text-red-500"}`}>{row.verificationStatus}</td>
                   <td className="p-3 flex justify-center gap-2 flex-wrap">
                     <button onClick={() => handleView(row)} title="View" className="h-[36px] w-[36px] flex items-center justify-center rounded cursor-pointer"><GoEye className="text-[#0088FF] w-6 h-6" /></button>
                     <button onClick={() => handleEdit(row)} title="Edit" className="h-[36px] w-[36px] flex items-center justify-center rounded cursor-pointer"><FaRegEdit className="text-[#0088FF] w-6 h-6" /></button>

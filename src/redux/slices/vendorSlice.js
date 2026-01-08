@@ -81,6 +81,34 @@ export const toggleVendorStatus = createAsyncThunk(
     }
   }
 );
+export const toggleVendorVerification = createAsyncThunk(
+  "vendor/toggleVerification",
+  async ({id , action}, {rejectWithValue}) => {
+    try {
+      const res = await axios.patch(
+        `${API_URL}/toggle-verification/${id}/${action}`,
+        {},
+        { headers: authHeaders() }
+      );
+
+      // Normalize possible response shapes from backend
+      const isAccountVerified =
+        res?.data?.data?.isAccountVerified ??
+        res?.data?.isAccountVerified ??
+        res?.data?.data?.vendor?.isAccountVerified ??
+        null;
+
+      return {
+        id,
+        isAccountVerified,
+      };
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || err.message
+      )
+    }
+  }
+)
 
 const initialState = {
   list: [],
@@ -188,6 +216,30 @@ const vendorSlice = createSlice({
         }
       })
       .addCase(toggleVendorStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error;
+      })
+      // toggle verification
+      .addCase(toggleVendorVerification.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(toggleVendorVerification.fulfilled, (state, action) => {
+        state.loading = false;
+        const id = action.payload?.id;
+        const isAccountVerified = action.payload?.isAccountVerified;
+
+        // If API returned updated data, use it; otherwise toggle status locally
+        if (id && state.current && state.current._id === id) {
+          state.current = { ...state.current, isAccountVerified };
+        }
+
+        // Update in list
+        const idx = state.list.findIndex((v) => v._id === id);
+        if (idx !== -1) {
+          state.list[idx] = { ...state.list[idx], isAccountVerified };
+        }
+      })
+      .addCase(toggleVendorVerification.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error;
       });

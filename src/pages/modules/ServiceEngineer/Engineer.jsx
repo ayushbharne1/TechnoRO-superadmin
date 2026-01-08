@@ -49,7 +49,7 @@ const Engineer = () => {
   };
 
   return (
-    <div className="p-4 h-full flex flex-col gap-4">
+    <div className="p-4 h-full flex flex-col gap-4 bg-white">
       <Header2 title="Service Engineer List"/>
 
       <div className=" p-4  flex flex-col gap-4">
@@ -107,6 +107,7 @@ const Engineer = () => {
                 <th className="p-3">Skill</th>
                 <th className="p-3">Phone</th>
                 <th className="p-3">Assigned Area</th>
+                <th className="p-3">Account Status</th>
                 <th className="p-3">Action</th>
               </tr>
             </thead>
@@ -122,6 +123,7 @@ const Engineer = () => {
                   <td className="p-3 capitalize">{row.skills?.[0]}</td>
                   <td className="p-3">{row.phone}</td>
                   <td className="p-3">{row.assignedArea}</td>
+                  <td className={`p-3 ${row.verificationStatus === "verified" ? "text-[#0088FF]" : row.verificationStatus === "pending" ? "text-[#FFC107]" : "text-[#FF383C]"} `}>{row.verificationStatus}</td>
                   <td className="p-3 flex justify-center gap-2">
                     <GoEye
                       onClick={() =>

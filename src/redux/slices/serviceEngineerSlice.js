@@ -6,6 +6,12 @@ import axios from "axios";
 const BASE_URL =
     "https://ro-service-engineer-be.onrender.com/api/admin/engineer";
 
+
+const authHeaders = () => {
+    const token = localStorage.getItem("adminToken");
+    return { Authorization: `Bearer ${token}` };
+}
+
 export const getAllServiceEngineers = createAsyncThunk(
     "serviceEngineer/getAll",
     async (_,{ rejectWithValue }) => {
@@ -104,6 +110,35 @@ export const updateServiceEngineer = createAsyncThunk(
         }
     }
 );
+export const toggleServiceEngineerVerification = createAsyncThunk(
+    "serviceEngineer/toggleVerification",
+    async ({id , action}, {rejectWithValue}) => {
+        try {
+            const res = await axios.patch(
+                `${BASE_URL}/toggle-verification/${id}/${action}`,
+                {},
+                {
+                    headers: authHeaders(),
+                }
+            );
+
+            // Normalize possible response shapes from backend
+            const isAccountVerified =
+                res?.data?.data?.isAccountVerified ??
+                res?.data?.isAccountVerified ??
+                res?.data?.data?.vendor?.isAccountVerified ??
+                null;
+
+            return {
+                id,
+                isAccountVerified,
+            };
+        } catch (err) {
+            return rejectWithValue(
+                err.response?.data || err.message
+            )
+        }
+    })
 
 const serviceEngineerSlice = createSlice({
     name: "serviceEngineer",
@@ -173,6 +208,18 @@ const serviceEngineerSlice = createSlice({
                 state.success = true;
             })
             .addCase(updateServiceEngineer.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            //toggle verification
+            .addCase(toggleServiceEngineerVerification.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(toggleServiceEngineerVerification.fulfilled, (state, action) => {
+                state.loading = false;
+                const {id , isAccountVerified} = action.payload;
+            })
+            .addCase(toggleServiceEngineerVerification.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });
