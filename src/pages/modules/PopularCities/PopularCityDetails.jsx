@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Header2 from "../../../components/superAdmin/header/Header2";
@@ -15,19 +15,6 @@ const SectionCard = ({ title, children, icon: Icon }) => (
   </div>
 );
 
-const RichBlock = ({ title, html, icon }) => (
-  <SectionCard title={title} icon={icon}>
-    {html ? (
-      <div
-        className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
-    ) : (
-      <p className="text-gray-400 italic">Not provided</p>
-    )}
-  </SectionCard>
-);
-
 const Badge = ({ label, color = "blue" }) => {
   const colors = {
     blue: "bg-blue-100 text-blue-700",
@@ -39,6 +26,71 @@ const Badge = ({ label, color = "blue" }) => {
     <span className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full ${colors[color] || colors.blue}`}>
       {label || "-"}
     </span>
+  );
+};
+
+const TabbedCard = ({ tabs }) => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Reset expanded state when changing tabs
+  const handleTabChange = (idx) => {
+    setActiveTab(idx);
+    setIsExpanded(false);
+  };
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 space-y-4">
+      {/* Tabs Header */}
+      <div className="flex border-b border-gray-200">
+        {tabs.map((tab, idx) => (
+          <button
+            key={idx}
+            onClick={() => handleTabChange(idx)}
+            className={`flex-1 px-6 py-3 font-semibold text-sm transition-all duration-300 relative ${
+              activeTab === idx
+                ? "text-[#7EC1B1]"
+                : "text-gray-600 hover:text-[#7EC1B1]"
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              {tab.icon && <tab.icon className="w-4 h-4" />}
+              <span>{tab.label}</span>
+            </div>
+            {activeTab === idx && (
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#7EC1B1] to-[#65a89d]"></div>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="mt-4">
+        {tabs[activeTab]?.html ? (
+          <div className="relative">
+            <div
+              className={`prose prose-sm max-w-none text-gray-700 leading-relaxed transition-all duration-300 overflow-hidden ${
+                isExpanded ? "max-h-none" : "max-h-[400px]"
+              }`}
+              dangerouslySetInnerHTML={{ __html: tabs[activeTab].html }}
+            />
+            {!isExpanded && (
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+            )}
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="px-6 py-2 text-sm font-semibold text-[#7EC1B1] hover:text-white hover:bg-[#7EC1B1] border-2 border-[#7EC1B1] rounded-lg transition-all duration-300"
+              >
+                {isExpanded ? "View Less" : "View More"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-400 italic text-center py-8">No content provided</p>
+        )}
+      </div>
+    </div>
   );
 };
 
@@ -136,13 +188,14 @@ const PopularCityDetails = () => {
         </div>
       </SectionCard>
 
-      {/* Rich Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RichBlock title="Overview" html={city.overview} icon={MapPin} />
-        <RichBlock title="Features" html={city.features} icon={Star} />
-      </div>
-      
-      <RichBlock title="Installation Guide" html={city.installation} icon={Building2} />
+      {/* Rich Content - Tabbed UI */}
+      <TabbedCard
+        tabs={[
+          { label: "Overview", icon: MapPin, html: city.overview },
+          { label: "Features", icon: Star, html: city.features },
+          { label: "Installation", icon: Building2, html: city.installation }
+        ]}
+      />
 
       {/* Recently Served Customers */}
       <SectionCard title={`Recently Served Customers (${servedCustomers.length})`} icon={Calendar}>

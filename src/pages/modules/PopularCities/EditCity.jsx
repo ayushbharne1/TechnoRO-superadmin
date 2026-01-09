@@ -8,6 +8,7 @@ import Faq from "./Faq";
 import ReviewManager from "./ReviewManager";
 import RecentlyServedManager from "./RecentlyServedManager";
 import StoreLocationManager from "./StoreLocationManager";
+import { State, City } from "country-state-city";
 
 const EditCity = () => {
   const navigate = useNavigate();
@@ -21,8 +22,9 @@ const EditCity = () => {
   const storeCity = routeId ? rows.find((c) => c.id === routeId || c._id === routeId) : null;
   const prefill = routeCity || storeCity || null;
 
-  const [city, setCity] = useState("");
+  const [stateCode, setStateCode] = useState("");
   const [state, setState] = useState("");
+  const [city, setCity] = useState("");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [whatsappLink, setWhatsappLink] = useState("");
@@ -93,8 +95,13 @@ const EditCity = () => {
 
       useNativeTooltip: false,
     }),
+    [],
     []
   );
+
+  // Get countries, states, and cities for dropdowns
+  const states = State.getStatesOfCountry("IN");
+  const cities = stateCode ? City.getCitiesOfState("IN", stateCode) : [];
 
   /* =========================
      Prefill form on mount
@@ -113,11 +120,27 @@ const EditCity = () => {
     const normWhatsapp = prefill.whatsappLink || prefill.whatsAppLink || "";
 
     setSelectedId(prefill.id || prefill._id || "");
-    setCity(normCity);
-    setState(normState);
     setMobile(normMobile);
     setEmail(normEmail);
     setWhatsappLink(normWhatsapp);
+    
+    // Find state code from Indian states and set state + city
+    if (normState) {
+      const indianStates = State.getStatesOfCountry("IN");
+      const foundState = indianStates.find(s => s.name === normState);
+      if (foundState) {
+        setStateCode(foundState.isoCode);
+        setState(normState);
+        setCity(normCity);
+      } else {
+        // Fallback if state not found
+        setState(normState);
+        setCity(normCity);
+      }
+    } else {
+      setCity(normCity);
+    }
+    
     setOverview(prefill.overview || "");
     setFeatures(prefill.features || "");
     setInstallation(prefill.installation || "");
@@ -174,41 +197,61 @@ const EditCity = () => {
 
       {/* Form Section */}
       <div className="bg-white mt-5 flex flex-col gap-8 w-full h-full">
-        {/* Row 1: City Name & State */}
+        {/* Row 1: State & City */}
         <div className="flex flex-col md:flex-row gap-6 w-full">
-          {/* City Name Field */}
-          <div className="flex-1 flex flex-col gap-2">
-            <label className="font-poppins font-medium text-gray-700 text-[16px]">
-              City Name
-            </label>
-            <input
-              type="text"
-              placeholder="Enter City Name"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
-              required
-            />
-          </div>
-
-          {/* State Field */}
+          {/* State Dropdown */}
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">
               State
             </label>
-            <input
-              type="text"
-              placeholder="Enter State Name"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
+            <select
+              value={stateCode}
+              onChange={(e) => {
+                const selectedCode = e.target.value;
+                const selectedState = states.find((s) => s.isoCode === selectedCode);
+                setStateCode(selectedCode);
+                setState(selectedState?.name || "");
+                setCity("");
+              }}
+              className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1] cursor-pointer"
               required
-            />
+            >
+              <option value="">Select State</option>
+              {states.map((s) => (
+                <option key={s.isoCode} value={s.isoCode}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Row 2: Mobile & Email */}
+        {/* Row 2: City & Mobile */}
         <div className="flex flex-col md:flex-row gap-6 w-full">
+          {/* City Dropdown */}
+          <div className="flex-1 flex flex-col gap-2">
+            <label className="font-poppins font-medium text-gray-700 text-[16px]">
+              City
+            </label>
+            <select
+              value={city}
+              onChange={(e) => {
+                const selectedName = e.target.value;
+                setCity(selectedName);
+              }}
+              className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              required
+              disabled={!stateCode}
+            >
+              <option value="">Select City</option>
+              {cities.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Mobile Number Field */}
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">
@@ -223,8 +266,10 @@ const EditCity = () => {
               required
             />
           </div>
+        </div>
 
-          {/* Email Field */}
+        {/* Row 3: Email */}
+        <div className="flex flex-col w-full">
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">
               Email
@@ -241,7 +286,7 @@ const EditCity = () => {
         </div>
 
         {/* Row 3: WhatsApp Link */}
-        <div className="flex flex-col w-full">
+        {/* <div className="flex flex-col w-full">
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">
               WhatsApp Link
@@ -254,7 +299,7 @@ const EditCity = () => {
               className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Overview Editor */}
         <div className="flex flex-col gap-3">
