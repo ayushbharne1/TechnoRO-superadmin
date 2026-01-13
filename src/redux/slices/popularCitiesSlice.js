@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const BASE_URL =
-  "https://ro-service-engineer-be-o14k.onrender.com/api/admin/popularCities";
+  "https://ro-service-engineer-be-ipm3.onrender.com/api/admin/popularCities";
 
 
 
@@ -11,18 +11,21 @@ const BASE_URL =
 ========================= */
 export const fetchPopularCities = createAsyncThunk(
   "popularCities/fetch",
-  async (_, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("adminToken");
 
-      const res = await axios.get(`${BASE_URL}/getAllCities`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await axios.get(
+        `${BASE_URL}/getAllCities?page=${page}&limit=${limit}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       // Backend → Frontend mapping
-      return (res.data?.cities || []).map((item) => ({
+      const mapped = (res.data?.cities || []).map((item) => ({
         id: item._id,
         city: item.city || "",
         cityName: item.city || "", // backward compatibility
@@ -41,6 +44,13 @@ export const fetchPopularCities = createAsyncThunk(
         faqs: item.faqs || [],
         storeLocations: item.storeLocations || [],
       }));
+
+      return {
+        cities: mapped,
+        totalCities: res.data?.totalCities ?? mapped.length,
+        totalPages: res.data?.totalPages ?? 1,
+        currentPage: res.data?.currentPage ?? page,
+      };
     } catch (error) {
       return rejectWithValue(
         error.response?.data || "Failed to fetch popular cities"
@@ -282,6 +292,9 @@ const popularCitiesSlice = createSlice({
     rows: [],
     loading: false,
     error: null,
+    totalCities: 0,
+    totalPages: 1,
+    currentPage: 1,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -292,7 +305,10 @@ const popularCitiesSlice = createSlice({
       })
       .addCase(fetchPopularCities.fulfilled, (state, action) => {
         state.loading = false;
-        state.rows = action.payload;
+        state.rows = action.payload.cities;
+        state.totalCities = action.payload.totalCities;
+        state.totalPages = action.payload.totalPages;
+        state.currentPage = action.payload.currentPage;
       })
       .addCase(fetchPopularCities.rejected, (state, action) => {
         state.loading = false;
@@ -307,6 +323,7 @@ const popularCitiesSlice = createSlice({
         state.loading = false;
         // push new city safely
         state.rows.unshift(action.payload);
+        state.totalCities = (state.totalCities || 0) + 1;
       })
       .addCase(addPopularCity.rejected, (state, action) => {
         state.loading = false;
@@ -322,6 +339,7 @@ const popularCitiesSlice = createSlice({
         state.rows = state.rows.filter(
           (city) => city.id !== action.payload
         );
+        state.totalCities = Math.max(0, (state.totalCities || 0) - 1);
       })
       .addCase(deletePopularCity.rejected, (state, action) => {
         state.loading = false;

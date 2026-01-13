@@ -55,11 +55,13 @@ const PopularCities = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const rows = useSelector((state) => state.popularCities.rows || []);
-
-  useEffect(() => {
-    dispatch(fetchPopularCities());
-  }, [dispatch]);
+  const {
+    rows,
+    totalCities = 0,
+    totalPages: serverTotalPages = 1,
+    currentPage: serverCurrentPage = 1,
+    loading = false,
+  } = useSelector((state) => state.popularCities || {});
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -72,21 +74,53 @@ const PopularCities = () => {
     setPage(1);
   };
 
-  const filteredRows = rows.filter((row) =>
-    String(row.cityName || "")
-      .toLowerCase()
-      .includes(search.toLowerCase())
+  // Fetch data: server-side pagination when not searching, otherwise fetch all to allow client-side search
+  useEffect(() => {
+    if (search && search.trim() !== "") {
+      // fetch all items so we can search across whole dataset
+      dispatch(fetchPopularCities({ page: 1, limit: 1000 }));
+      setPage(1);
+    } else {
+      dispatch(fetchPopularCities({ page, limit: rowsPerPage }));
+    }
+  }, [dispatch, page, rowsPerPage, search]);
+
+  // Ensure local page reflects server page when performing server-side pagination
+  useEffect(() => {
+    setPage(serverCurrentPage || 1);
+  }, [serverCurrentPage]);
+
+  // filter rows (if search active, rows contains all items; if not, rows contains current page only)
+  const filteredRows = (rows || []).filter((row) =>
+    String(row.cityName || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+  const totalEntries = search ? filteredRows.length : totalCities;
+  // Use server's totalPages when not searching (server-side pagination)
+  const totalPages = search
+    ? Math.max(1, Math.ceil(totalEntries / rowsPerPage))
+    : Math.max(1, serverTotalPages || Math.ceil(totalEntries / rowsPerPage));
 
-  const paginatedRows = filteredRows.slice(
-    (page - 1) * rowsPerPage,
-    page * rowsPerPage
-  );
+  // When not searching, `rows` already contains the current server page items.
+  // Only slice when we have the full dataset (search active)
+  let paginatedRows = [];
+  if (search && search.trim() !== "") {
+    paginatedRows = filteredRows.slice(
+      (page - 1) * rowsPerPage,
+      page * rowsPerPage
+    );
+  } else {
+    paginatedRows = rows || [];
+  }
 
   const handlePageChange = (newPage) => {
-    if (newPage > 0 && newPage <= totalPages) setPage(newPage);
+    if (newPage > 0 && newPage <= totalPages) {
+      setPage(newPage);
+      // If not searching, fetch server page data
+      if (!search || search.trim() === "") {
+        dispatch(fetchPopularCities({ page: newPage, limit: rowsPerPage }));
+      }
+    }
   };
 
   // 
@@ -120,7 +154,8 @@ const PopularCities = () => {
             <select
               value={rowsPerPage}
               onChange={handleRowsPerPage}
-              className="bg-gray-100 p-2 border rounded w-[70px]"
+              disabled={loading}
+              className={`bg-gray-100 p-2 border rounded w-[70px] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {[5, 10, 15].map((num) => (
                 <option key={num} value={num}>
@@ -138,21 +173,32 @@ const PopularCities = () => {
               placeholder="Search city name"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 h-10 border rounded-md w-full bg-[#F5F5F5]"
+              disabled={loading}
+              className={`pl-10 h-10 border rounded-md w-full bg-[#F5F5F5] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
           </div>
 
           <button
             onClick={() => navigate("/popular-cities/add-new-city")}
-            className="bg-[#7EC1B1] w-[200px] text-white p-2 rounded-lg"
+            disabled={loading}
+            className={`bg-[#7EC1B1] w-[200px] text-white p-2 rounded-lg ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             Add New City
           </button>
         </div>
 
         {/* Table */}
-        <div className="max-h-[600px] overflow-y-auto border border-gray-400">
-          <table className="table-auto w-full border-collapse">
+        <div className="relative max-h-[600px] overflow-y-auto border border-gray-400">
+          {loading && (
+            <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center z-20">
+              <div className="flex flex-col items-center gap-2">
+                <div className="animate-spin rounded-full h-10 w-10 border-4 border-t-[#7EC1B1] border-gray-200"></div>
+                <span className="text-gray-700 font-medium">Loading...</span>
+              </div>
+            </div>
+          )}
+
+          <table className={`table-auto w-full border-collapse ${loading ? 'opacity-60' : ''}`}>
             <thead className="bg-[#F3F4F6] sticky top-0 z-10">
               <tr className="text-center">
                 <th className="p-3">Sr. No.</th>
@@ -235,37 +281,35 @@ const PopularCities = () => {
         {/* Pagination */}
         <div className="flex justify-between items-center">
           <span>
-            Showing {(page - 1) * rowsPerPage + 1} to{" "}
-            {Math.min(page * rowsPerPage, filteredRows.length)} of{" "}
-            {filteredRows.length} entries
+            Showing {(page - 1) * rowsPerPage + 1} to {Math.min(page * rowsPerPage, totalEntries)} of {totalEntries} entries
           </span>
 
           <div className="flex gap-2">
             <button
-              disabled={page === 1}
+              disabled={loading || page === 1}
               onClick={() => handlePageChange(page - 1)}
-              className="px-3 py-1 border rounded"
+              className={`px-3 py-1 border rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Previous
             </button>
 
             {[...Array(totalPages)].map((_, i) => (
               <button
-                // key={i}
                 key={`page-${i + 1}`}
                 onClick={() => handlePageChange(i + 1)}
+                disabled={loading}
                 className={`px-3 py-1 border rounded ${
                   page === i + 1 ? "bg-[#7EC1B1] text-white" : ""
-                }`}
+                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {i + 1}
               </button>
             ))}
 
             <button
-              disabled={page === totalPages}
+              disabled={loading || page === totalPages}
               onClick={() => handlePageChange(page + 1)}
-              className="px-3 py-1 border rounded"
+              className={`px-3 py-1 border rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Next
             </button>
