@@ -7,38 +7,42 @@ import JoditEditor from "jodit-pro-react";
 import Faq from "./Faq";
 import ReviewManager from "./ReviewManager";
 import RecentlyServedManager from "./RecentlyServedManager";
-import { Store } from "lucide-react";
 import StoreLocationManager from "./StoreLocationManager";
+import { State, City } from "country-state-city";
 
 const AddCity = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [city, setCity] = useState("");
+  const [stateCode, setStateCode] = useState("");
   const [state, setState] = useState("");
+  const [city, setCity] = useState("");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   // const [whatsappLink, setWhatsappLink] = useState("");
-  
+
   // Separate state for each editor
   const [overview, setOverview] = useState("");
   const [features, setFeatures] = useState("");
   const [installation, setInstallation] = useState("");
-  
+
   // State for child components data
   const [servedCustomers, setServedCustomers] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [faqs, setFaqs] = useState([]);
   const [storeLocations, setStoreLocations] = useState([]);
-  
+
   // Loading and error states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   // Separate refs for each editor
   const overviewRef = React.useRef(null);
   const featuresRef = React.useRef(null);
   const installationRef = React.useRef(null);
+
+  const states = State.getStatesOfCountry("IN");
+  const cities = stateCode ? City.getCitiesOfState("IN", stateCode) : [];
 
   const editorConfig = React.useMemo(
     () => ({
@@ -91,8 +95,8 @@ const AddCity = () => {
     try {
       const result = await dispatch(
         addPopularCity({
-          city,
-          state,
+          city: city || "",
+          state: state || "",
           mobile,
           email,
           // whatsappLink,
@@ -108,8 +112,9 @@ const AddCity = () => {
 
       if (result.type === addPopularCity.fulfilled.type) {
         // Reset form fields
-        setCity("");
+        setStateCode("");
         setState("");
+        setCity("");
         setMobile("");
         setEmail("");
         // setWhatsappLink("");
@@ -127,7 +132,9 @@ const AddCity = () => {
         // Navigate back to the previous page
         navigate("/popular-cities");
       } else if (result.type === addPopularCity.rejected.type) {
-        setError(result.payload?.message || "Failed to add city. Please try again.");
+        setError(
+          result.payload?.message || "Failed to add city. Please try again."
+        );
       }
     } catch (error) {
       console.error("Error:", error);
@@ -144,41 +151,63 @@ const AddCity = () => {
 
       {/* Form Section */}
       <div className="bg-white mt-5 flex flex-col gap-8 w-full h-full">
-        {/* Row 1: City Name & State */}
+        {/* Row 1: State & City */}
         <div className="flex flex-col md:flex-row gap-6 w-full">
-          {/* City Name Field */}
-          <div className="flex-1 flex flex-col gap-2">
-            <label className="font-poppins font-medium text-gray-700 text-[16px]">
-              City Name
-            </label>
-            <input
-              type="text"
-              placeholder="Enter City Name"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
-              required
-            />
-          </div>
-
-          {/* State Field */}
+          {/* State Dropdown */}
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">
               State
             </label>
-            <input
-              type="text"
-              placeholder="Enter State Name"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
+            <select
+              value={stateCode}
+              onChange={(e) => {
+                const selectedCode = e.target.value;
+                const selectedState = states.find(
+                  (s) => s.isoCode === selectedCode
+                );
+                setStateCode(selectedCode);
+                setState(selectedState?.name || "");
+                setCity("");
+              }}
+              className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1] cursor-pointer"
               required
-            />
+            >
+              <option value="">Select State</option>
+              {states.map((s) => (
+                <option key={s.isoCode} value={s.isoCode}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Row 2: Mobile & Email */}
+        {/* Row 2: City & Mobile */}
         <div className="flex flex-col md:flex-row gap-6 w-full">
+          {/* City Dropdown */}
+          <div className="flex-1 flex flex-col gap-2">
+            <label className="font-poppins font-medium text-gray-700 text-[16px]">
+              City
+            </label>
+            <select
+              value={city}
+              onChange={(e) => {
+                const selectedName = e.target.value;
+                setCity(selectedName);
+              }}
+              className="p-3 border border-[#606060] bg-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              required
+              disabled={!stateCode}
+            >
+              <option value="">Select City</option>
+              {cities.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Mobile Number Field */}
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">
@@ -193,8 +222,10 @@ const AddCity = () => {
               required
             />
           </div>
+        </div>
 
-          {/* Email Field */}
+        {/* Row 3: Email */}
+        <div className="flex flex-col w-full">
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">
               Email
@@ -280,9 +311,15 @@ const AddCity = () => {
 
         <Faq faqs={faqs} setFaqs={setFaqs} />
         <ReviewManager reviews={reviews} setReviews={setReviews} />
-        <RecentlyServedManager servedCustomers={servedCustomers} setServedCustomers={setServedCustomers} />
-        <StoreLocationManager storeLocations={storeLocations} setStoreLocations={setStoreLocations} />
-        
+        <RecentlyServedManager
+          servedCustomers={servedCustomers}
+          setServedCustomers={setServedCustomers}
+        />
+        <StoreLocationManager
+          storeLocations={storeLocations}
+          setStoreLocations={setStoreLocations}
+        />
+
         {/* Error Message */}
         {error && (
           <div className="w-full p-4 bg-red-50 border border-red-300 rounded-lg">
