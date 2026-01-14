@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { FiSearch, FiEdit, FiEye, FiTrash2 } from "react-icons/fi";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import { useNavigate } from "react-router-dom";
@@ -126,7 +126,8 @@ const RolesAndPermissions = () => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="table-auto w-full border border-[#CACACA] min-w-[950px] rounded-lg">
+        <div className="relative max-h-[600px] overflow-y-auto border border-[#CACACA] rounded-lg">
+          <table className="table-auto w-full min-w-[950px]">
           <thead>
             <tr className="bg-[#F5F5F5] text-center">
               {[
@@ -186,7 +187,8 @@ const RolesAndPermissions = () => {
               </tr>
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
 
       {/* Pagination */}

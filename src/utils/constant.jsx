@@ -18,6 +18,7 @@ import { CiLogout } from "react-icons/ci";
 import { TiMessages } from "react-icons/ti";
 import { PiChartLineUp } from "react-icons/pi";
 import { FaMapLocationDot } from "react-icons/fa6";
+import { MdArticle } from "react-icons/md";
 
 
 // Custom Icons
@@ -100,6 +101,17 @@ export const sidebarItems = [
         name: "Popular Cities",
         icon: <FaMapLocationDot />,
         path: "/popular-cities",
+      },
+    ],
+  },
+  {
+    groupName: "Content Management",
+    groupItems: [
+      {
+        id: 1,
+        name: "Blog",
+        icon: <MdArticle />,
+        path: "/blog",
       },
     ],
   },

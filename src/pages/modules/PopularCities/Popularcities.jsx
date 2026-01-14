@@ -157,7 +157,7 @@ const PopularCities = () => {
               disabled={loading}
               className={`bg-gray-100 p-2 border rounded w-[70px] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {[5, 10, 15].map((num) => (
+              {[5, 10, 15, 30, 45].map((num) => (
                 <option key={num} value={num}>
                   {num}
                 </option>

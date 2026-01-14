@@ -124,6 +124,12 @@ import AddCity from "../pages/modules/PopularCities/AddCity";
 import EditCity from "../pages/modules/PopularCities/EditCity";
 import PopularCityDetails from "../pages/modules/PopularCities/PopularCityDetails";
 
+// --- BLOG ---
+import Blog from "../pages/modules/Blog/Blog";
+import AddBlog from "../pages/modules/Blog/AddBlog";
+import EditBlog from "../pages/modules/Blog/EditBlog";
+import ViewBlog from "../pages/modules/Blog/ViewBlog";
+
 const AdminLayout = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
@@ -332,6 +338,12 @@ const AdminLayout = () => {
               <Route path="/popular-cities/add-new-city" element={<AddCity />} />
               <Route path="/popular-cities/edit-city/:id" element={<EditCity />} />
               <Route path="/popular-cities/view-city/:id" element={<PopularCityDetails />} />
+
+              {/* BLOG */}
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/add" element={<AddBlog />} />
+              <Route path="/blog/edit/:id" element={<EditBlog />} />
+              <Route path="/blog/view/:id" element={<ViewBlog />} />
                     
             </Routes>
             </div>
