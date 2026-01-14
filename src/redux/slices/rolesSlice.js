@@ -10,11 +10,11 @@ const authHeaders = () => {
 
 export const fetchRoles = createAsyncThunk(
   "role/fetchAll",
-  async ({ search = "" } = {}, { rejectWithValue }) => {
+  async ({ search = "", limit = 1000 } = {}, { rejectWithValue }) => {
     try {
       const res = await axios.get(`${API_URL}/all`, {
         headers: authHeaders(),
-        params: { role: "subAdmin", search },
+        params: { role: "subAdmin", search, limit },
       });
       if (res.data?.success) return res.data.data || [];
       return rejectWithValue(res.data || { message: "Failed to fetch" });

@@ -22,7 +22,7 @@ const Vendor = () => {
       navigate("/");
       return;
     }
-    dispatch(fetchVendors({ search }));
+    dispatch(fetchVendors({ search, limit: 100 }));
   }, [dispatch, navigate, search]);
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const Vendor = () => {
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-poppins text-[16px]">Show</span>
           <select value={rowsPerPage} onChange={handleRowsPerPage} className="p-2 border rounded w-[60px]">
-            {[5, 10, 15, 20].map((num) => (<option key={num} value={num}>{num}</option>))}
+            {[5, 10, 15, 20, 50].map((num) => (<option key={num} value={num}>{num}</option>))}
           </select>
           <span className="font-poppins text-[16px]">Entries</span>
         </div>
@@ -79,7 +79,8 @@ const Vendor = () => {
       </div>
       <div className="bg-white p-3 sm:p-5 rounded-lg shadow flex flex-col gap-4 overflow-x-auto">
         <div className="hidden sm:block">
-          <table className="table-auto w-full border border-gray-400 min-w-[700px]">
+          <div className="relative max-h-[600px] overflow-y-auto border border-gray-400 rounded-lg">
+            <table className="table-auto w-full min-w-[700px]">
             <thead>
               <tr className="bg-[#CACACA] text-center">
                 <th className="p-3 font-poppins font-medium text-[18px]">Sr. No.</th>
@@ -111,7 +112,8 @@ const Vendor = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
         {/* Mobile cards view... */}
         <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-3 flex-wrap font-semibold text-gray-700">

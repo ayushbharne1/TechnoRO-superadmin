@@ -25,7 +25,7 @@ const Manufacturer = () => {
       navigate("/");
       return;
     }
-    dispatch(fetchManufacturers({ search }));
+    dispatch(fetchManufacturers({ search, limit: 10000 }));
   }, [dispatch, navigate, search]);
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const Manufacturer = () => {
             onChange={handleRowsPerPage}
             className="bg-gray-100 p-2 border rounded w-[60px] md:w-[80px] text-sm"
           >
-            {[5, 10, 15].map((num) => (
+            {[5, 10, 15, 20, 50].map((num) => (
               <option key={num} value={num}>
                 {num}
               </option>
@@ -116,7 +116,8 @@ const Manufacturer = () => {
         </div>
       </div>
       <div className="bg-white p-4 w-full rounded-lg shadow overflow-x-auto">
-        <table className="table-auto w-full border border-gray-400 min-w-[600px] sm:min-w-[800px]">
+        <div className="relative max-h-[600px] overflow-y-auto border border-gray-400 rounded-lg">
+          <table className="table-auto w-full min-w-[600px] sm:min-w-[800px]">
           <thead>
             <tr className="bg-[#F3F4F6] text-center text-base sm:text-xl">
               <th className="h-[60px] font-poppins font-medium text-[14px] sm:text-[18px] text-black">
@@ -208,8 +209,9 @@ const Manufacturer = () => {
                 </td>
               </tr>
             )}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
         <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-2 flex-wrap font-semibold text-gray-700 text-sm">
           <span>
             {rows.length === 0

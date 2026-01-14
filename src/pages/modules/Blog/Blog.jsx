@@ -159,12 +159,6 @@ const Blog = () => {
                   Date
                 </th>
                 <th className="p-3 font-poppins font-medium text-[18px]">
-                  Views
-                </th>
-                <th className="p-3 font-poppins font-medium text-[18px]">
-                  Status
-                </th>
-                <th className="p-3 font-poppins font-medium text-[18px]">
                   Action
                 </th>
               </tr>
@@ -172,7 +166,7 @@ const Blog = () => {
             <tbody className="text-center">
               {paginatedRows.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="p-6">
+                  <td colSpan="5" className="p-6">
                     No blogs found
                   </td>
                 </tr>
@@ -194,18 +188,6 @@ const Blog = () => {
                       {row.author}
                     </td>
                     <td className="p-3 font-poppins font-normal">{row.date}</td>
-                    <td className="p-3 font-poppins font-normal">
-                      {row.views}
-                    </td>
-                    <td
-                      className={`p-3 font-poppins font-normal ${
-                        row.status === "Published"
-                          ? "text-green-600"
-                          : "text-yellow-600"
-                      }`}
-                    >
-                      {row.status}
-                    </td>
                     <td className="p-3 flex justify-center gap-2 flex-wrap">
                       <button
                         onClick={() => handleView(row)}
@@ -245,19 +227,9 @@ const Blog = () => {
             >
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-semibold text-base">{row.title}</h3>
-                <span
-                  className={`text-xs px-2 py-1 rounded ${
-                    row.status === "Published"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
-                >
-                  {row.status}
-                </span>
               </div>
               <p className="text-sm text-gray-600 mb-1">Author: {row.author}</p>
-              <p className="text-sm text-gray-600 mb-1">Date: {row.date}</p>
-              <p className="text-sm text-gray-600 mb-3">Views: {row.views}</p>
+              <p className="text-sm text-gray-600 mb-3">Date: {row.date}</p>
               <div className="flex gap-2 justify-end">
                 <button
                   onClick={() => handleView(row)}

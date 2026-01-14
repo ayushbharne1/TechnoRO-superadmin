@@ -11,11 +11,11 @@ const authHeaders = () => {
 
 export const fetchManufacturers = createAsyncThunk(
   "manufacturer/fetchAll",
-  async ({ search = "" } = {}, { rejectWithValue }) => {
+  async ({ search = "", limit = 10000 } = {}, { rejectWithValue }) => {
     try {
       const res = await axios.get(`${API_URL}/all`, {
         headers: authHeaders(),
-        params: { search },
+        params: { search, limit },
       });
       if (res.data?.success) return res.data.data || [];
       return rejectWithValue(res.data || { message: "Failed to fetch" });

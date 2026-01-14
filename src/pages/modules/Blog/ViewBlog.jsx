@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Calendar, User, Eye } from "lucide-react";
+import { ArrowLeft, Calendar, User } from "lucide-react";
 import Header2 from "../../../components/superAdmin/header/Header2";
 
 // Dummy Blog Data (same as Blog.jsx and EditBlog.jsx)
@@ -122,21 +122,6 @@ const ViewBlog = () => {
           <div className="flex items-center gap-2">
             <Calendar size={18} />
             <span className="font-poppins text-sm">{blog.date}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Eye size={18} />
-            <span className="font-poppins text-sm">{blog.views} views</span>
-          </div>
-          <div>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                blog.status === "Published"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-yellow-100 text-yellow-700"
-              }`}
-            >
-              {blog.status}
-            </span>
           </div>
         </div>
 

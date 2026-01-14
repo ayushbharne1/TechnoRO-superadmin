@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header2 from "../../../components/superAdmin/header/Header2";
+import JoditEditor from "jodit-pro-react";
 
 const AddBlog = () => {
   const navigate = useNavigate();
@@ -11,15 +12,58 @@ const AddBlog = () => {
     author: "",
     content: "",
     image: "",
-    status: "Draft",
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+
+  const contentRef = React.useRef(null);
+
+  const editorConfig = React.useMemo(
+    () => ({
+      readonly: false,
+      minHeight: 400,
+      placeholder: "Start typing your blog content here...",
+      enter: "P",
+      list: {
+        autoIndent: true,
+      },
+      buttons: [
+        "bold",
+        "italic",
+        "underline",
+        "|",
+        "ul",
+        "ol",
+        "|",
+        "outdent",
+        "indent",
+        "|",
+        "undo",
+        "redo",
+        "|",
+        "link",
+        "table",
+        "|",
+        "hr",
+        "fullsize",
+      ],
+      toolbarAdaptive: false,
+      showCharsCounter: false,
+      showWordsCounter: false,
+      showXPathInStatusbar: false,
+      askBeforePasteHTML: false,
+      askBeforePasteFromWord: false,
+      useNativeTooltip: false,
+    }),
+    []
+  );
 
   const validate = () => {
     const errors = [];
     if (!formData.title.trim()) errors.push("Title is required");
     if (!formData.author.trim()) errors.push("Author name is required");
     if (!formData.content.trim()) errors.push("Content is required");
-    if (!formData.image.trim()) errors.push("Image URL is required");
+    if (!imageFile && !formData.image) errors.push("Image is required");
     return errors;
   };
 
@@ -27,6 +71,21 @@ const AddBlog = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setError("");
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("Please select a valid image file");
+        return;
+      }
+      setImageFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+      setFormData((prev) => ({ ...prev, image: file.name }));
+      setError("");
+    }
   };
 
   const handleAdd = async (e) => {
@@ -101,58 +160,39 @@ const AddBlog = () => {
             <label className="block font-poppins text-[16px] font-medium mb-2">
               Content <span className="text-red-500">*</span>
             </label>
-            <textarea
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              placeholder="Enter blog content"
-              rows="10"
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7EC1B1] resize-none"
-            />
+            <div className="border border-gray-300 rounded-lg overflow-hidden">
+              <JoditEditor
+                ref={contentRef}
+                defaultValue={formData.content}
+                config={editorConfig}
+                tabIndex={1}
+                onBlur={(newContent) => setFormData((prev) => ({ ...prev, content: newContent }))}
+                onChange={() => {}}
+              />
+            </div>
           </div>
 
-          {/* Image URL */}
+          {/* Image Upload */}
           <div>
             <label className="block font-poppins text-[16px] font-medium mb-2">
-              Image URL <span className="text-red-500">*</span>
+              Upload Image <span className="text-red-500">*</span>
             </label>
             <input
-              type="url"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              placeholder="Enter image URL"
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7EC1B1] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#7EC1B1] file:text-white hover:file:bg-[#6DB0A0] file:cursor-pointer"
             />
-            {formData.image && (
+            {imagePreview && (
               <div className="mt-3">
                 <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
                 <img
-                  src={formData.image}
+                  src={imagePreview}
                   alt="Preview"
                   className="w-full max-w-md h-48 object-cover rounded-lg border"
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                  }}
                 />
               </div>
             )}
-          </div>
-
-          {/* Status */}
-          <div>
-            <label className="block font-poppins text-[16px] font-medium mb-2">
-              Status <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
-            >
-              <option value="Draft">Draft</option>
-              <option value="Published">Published</option>
-            </select>
           </div>
 
           {/* Buttons */}
