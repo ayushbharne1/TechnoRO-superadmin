@@ -359,6 +359,10 @@ const popularCitiesSlice = createSlice({
         if (index !== -1) {
           state.rows[index] = action.payload;
         }
+        
+        // Reset pagination to prevent jitter after update
+        // This ensures data is refetched with correct pagination
+        state.currentPage = 1;
       })
       .addCase(updatePopularCity.rejected, (state, action) => {
         state.loading = false;
