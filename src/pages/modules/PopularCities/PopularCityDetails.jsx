@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import { fetchPopularCities } from "../../../redux/slices/popularCitiesSlice";
-import { MapPin, Phone, Mail, MessageCircle, Star, Calendar, Clock, Building2 } from "lucide-react";
+import { MapPin, Star, Calendar, Clock, Building2 } from "lucide-react";
+import { MdPhone, MdEmail, MdWhatsapp } from "react-icons/md";
 
 const SectionCard = ({ title, children, icon: Icon }) => (
   <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 space-y-4">
@@ -145,11 +146,11 @@ const PopularCityDetails = () => {
       </div>
 
       {/* Contact Information */}
-      <SectionCard title="Contact Information" icon={Phone}>
+      <SectionCard title="Contact Information">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#7EC1B1] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-              <Phone className="w-5 h-5 text-[#7EC1B1]" />
+            <div className="w-10 h-10 rounded-full bg-white border border-[#7EC1B1] flex items-center justify-center flex-shrink-0">
+              <MdPhone className="w-7 h-7 text-[#17826b] font-bold" style={{ display: 'inline' }} />
             </div>
             <div>
               <div className="text-xs text-gray-500 mb-1">Phone Number</div>
@@ -157,8 +158,8 @@ const PopularCityDetails = () => {
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#7EC1B1] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-              <Mail className="w-5 h-5 text-[#7EC1B1]" />
+            <div className="w-10 h-10 rounded-full bg-white border border-[#7EC1B1] flex items-center justify-center flex-shrink-0">
+              <MdEmail className="w-7 h-7 text-[#17826b] font-bold" style={{ display: 'inline' }} />
             </div>
             <div>
               <div className="text-xs text-gray-500 mb-1">Email Address</div>
@@ -166,8 +167,8 @@ const PopularCityDetails = () => {
             </div>
           </div>
           <div className="flex items-start gap-3 md:col-span-2">
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-              <MessageCircle className="w-5 h-5 text-green-600" />
+            <div className="w-10 h-10 rounded-full bg-white border border-green-500 flex items-center justify-center flex-shrink-0">
+              <MdWhatsapp className="w-7 h-7 text-green-600 font-bold" style={{ display: 'inline' }} />
             </div>
             <div>
               <div className="text-xs text-gray-500 mb-1">WhatsApp</div>
@@ -261,7 +262,7 @@ const PopularCityDetails = () => {
       </SectionCard>
 
       {/* FAQs */}
-      <SectionCard title={`Frequently Asked Questions (${faqs.length})`} icon={MessageCircle}>
+      <SectionCard title={`Frequently Asked Questions (${faqs.length})`}>
         {faqs.length === 0 ? (
           <p className="text-gray-400 italic">No FAQs added.</p>
         ) : (
