@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchManufacturerById, updateManufacturer } from "../../../redux/slices/manufacturerSlice";
@@ -6,6 +7,7 @@ import Header2 from "../../../components/superAdmin/header/Header2";
 import bankIcon from "../../../assets/proicons_bank.png";
 
 const EditManufacturer = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -197,14 +199,25 @@ const EditManufacturer = () => {
             </div>
             <div className="flex-1 flex flex-col gap-2">
               <label className="font-poppins font-medium text-gray-700 text-[16px]">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password || ""}
-                onChange={handleChange}
-                className="p-3 border border-[#606060] bg-[#F5F5F5]"
-                placeholder="Enter new password (optional)"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password || ""}
+                  onChange={handleChange}
+                  className="p-3 border border-[#606060] bg-[#F5F5F5] w-full pr-10"
+                  placeholder="Enter new password (optional)"
+                />
+                <span
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-600"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <MdVisibilityOff size={22} /> : <MdVisibility size={22} />}
+                </span>
+              </div>
             </div>
           </div>
           <div className="mt-4"><h2 className="text-[#2F8868] font-semibold flex items-center gap-2"><img src={bankIcon} alt="bank"/>Bank Details</h2></div>

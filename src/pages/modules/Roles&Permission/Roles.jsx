@@ -130,13 +130,12 @@ const RolesAndPermissions = () => {
           <table className="table-auto w-full min-w-[950px]">
           <thead>
             <tr className="bg-[#F5F5F5] text-center">
-              {[
+              {[ 
                 "S.No",
                 "Sub Admin Name",
                 "Role",
                 "Phone",
                 "Email",
-                "Password",
                 "Action",
               ].map((head, i) => (
                 <th key={i} className="p-3 font-medium text-[18px]">
@@ -162,7 +161,7 @@ const RolesAndPermissions = () => {
                   <td className="p-3">{row.role}</td>
                   <td className="p-3">{row.mobile || row.phone}</td>
                   <td className="p-3">{row.email}</td>
-                  <td className="p-3">******</td>
+                  {/* Password column removed */}
                   <td className="p-3 flex justify-center gap-3">
                     <FiEye
                       className="text-blue-600 w-5 h-5 cursor-pointer"

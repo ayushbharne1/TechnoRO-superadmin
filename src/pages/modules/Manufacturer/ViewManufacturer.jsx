@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -30,6 +30,7 @@ const orders = [
 
 /* -------------------- COMPONENT -------------------- */
 const ViewManufacturer = () => {
+  const [orderSearch, setOrderSearch] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -94,6 +95,17 @@ const ViewManufacturer = () => {
       </div>
     );
   }
+
+  // Filter orders by search query (orderId, customer, product, status)
+  const filteredOrders = orders.filter((o) => {
+    const q = orderSearch.toLowerCase();
+    return (
+      o.orderId.toLowerCase().includes(q) ||
+      o.customer.toLowerCase().includes(q) ||
+      o.product.toLowerCase().includes(q) ||
+      o.status.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="min-h-screen bg-white p-4 sm:p-6 space-y-6">
@@ -236,6 +248,8 @@ const ViewManufacturer = () => {
               <input
                 className="border border-gray-300 rounded px-3 py-1"
                 placeholder="Search"
+                value={orderSearch}
+                onChange={e => setOrderSearch(e.target.value)}
               />
               <select className="border border-gray-300 rounded px-3 py-1">
                 <option>Select Status</option>
@@ -258,7 +272,7 @@ const ViewManufacturer = () => {
                 </tr>
               </thead>
               <tbody>
-                {orders.map((o, idx) => (
+                {filteredOrders.map((o, idx) => (
                   <tr key={o.id} className="border-b border-gray-100 text-center">
                     <td className="p-3">{idx + 1}</td>
                     <td className="p-3">{o.orderId}</td>

@@ -106,7 +106,8 @@ export const addPopularCity = createAsyncThunk(
           customerName: r.customerName || r.name || "",
           location: r.location || "",
           rating: r.rating || 0,
-          reviewText: r.reviewText || r.review || "",
+          review: r.review || r.reviewText || "",
+          image: r.image || "",
         })),
         faqs: faqs || [],
         storeLocations: (storeLocations || []).map((s) => ({
@@ -144,7 +145,11 @@ export const addPopularCity = createAsyncThunk(
         features: item.features || "",
         installation: item.installation || "",
         servedCustomers: item.servedCustomers || [],
-        reviews: item.reviews || [],
+        reviews: (item.reviews || []).map((r) => ({
+          ...r,
+          review: r.review || r.reviewText || "",
+          image: r.image || "",
+        })),
         faqs: item.faqs || [],
         storeLocations: item.storeLocations || [],
       };
@@ -227,7 +232,8 @@ export const updatePopularCity = createAsyncThunk(
           customerName: r.customerName || r.name || "",
           location: r.location || "",
           rating: r.rating || 0,
-          reviewText: r.reviewText || r.review || "",
+          review: r.review || r.reviewText || "",
+          image: r.image || "",
         })),
         faqs: faqs || [],
         storeLocations: (storeLocations || []).map((s) => ({
@@ -270,7 +276,11 @@ export const updatePopularCity = createAsyncThunk(
         features: item.features || "",
         installation: item.installation || "",
         servedCustomers: item.servedCustomers || [],
-        reviews: item.reviews || [],
+        reviews: (item.reviews || []).map((r) => ({
+          ...r,
+          review: r.review || r.reviewText || "",
+          image: r.image || "",
+        })),
         faqs: item.faqs || [],
         storeLocations: item.storeLocations || [],
       };

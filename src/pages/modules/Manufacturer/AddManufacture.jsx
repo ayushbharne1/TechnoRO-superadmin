@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addManufacturer } from "../../../redux/slices/manufacturerSlice";
@@ -6,6 +7,7 @@ import Header2 from "../../../components/superAdmin/header/Header2";
 import bankIcon from "../../../assets/proicons_bank.png";
 
 const AddManufacturer = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const { loading: isSubmitting } = useSelector((s) => s.manufacturer);
   const [formData, setFormData] = useState({
@@ -165,14 +167,25 @@ const AddManufacturer = () => {
           </div>
           <div className="flex-1 flex flex-col gap-2">
             <label className="font-poppins font-medium text-gray-700 text-[16px]">Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter Password"
-              value={formData.password}
-              onChange={handleChange}
-              className="p-3 border border-[#606060] bg-[#F5F5F5]"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Enter Password"
+                value={formData.password}
+                onChange={handleChange}
+                className="p-3 border border-[#606060] bg-[#F5F5F5] w-full pr-10"
+              />
+              <span
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-600"
+                onClick={() => setShowPassword((prev) => !prev)}
+                tabIndex={0}
+                role="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <MdVisibilityOff size={22} /> : <MdVisibility size={22} />}
+              </span>
+            </div>
           </div>
         </div>
         
