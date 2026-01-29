@@ -146,12 +146,21 @@ const ViewLead = () => {
                     <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">Price Details</h3>
                     <div className="space-y-3 text-sm md:text-base text-gray-600">
                         <div className="flex justify-between"><span>Price (1 Items)</span><span className="font-medium text-gray-900">₹{selectedLead.subtotal || 0}</span></div>
-                        <div className="flex justify-between"><span>Discount</span><span className="text-green-500 font-medium">-₹{ (Number(selectedLead.subtotal || 0) - Number(selectedLead.totalAmount || 0)).toFixed(0) }</span></div>
+                        <div className="flex justify-between"><span>Discount</span><span className="text-green-500 font-medium">-₹{selectedLead.discount || 0}</span></div>
                         <div className="flex justify-between"><span>Platform Fee</span><span className="font-medium text-gray-900">₹{selectedLead.taxesAndFees || 0}</span></div>
                         <div className="flex justify-between"><span>Delivery Charges</span><span className="text-green-500 font-medium">Free</span></div>
                     </div>
                     <div className="border-t border-gray-300 border-dashed my-4"></div>
-                    <div className="flex justify-between text-lg font-bold text-gray-900"><span>Total Amount</span><span>₹{selectedLead.totalAmount || 0}</span></div>
+                    <div className="flex justify-between text-lg font-bold text-gray-900">
+                      <span>Total Amount</span>
+                      <span>
+                        ₹{
+                          Number(selectedLead.subtotal || 0)
+                          - Number(selectedLead.discount || 0)
+                          + Number(selectedLead.taxesAndFees || 0)
+                        }
+                      </span>
+                    </div>
                 </div>
             )}
 
