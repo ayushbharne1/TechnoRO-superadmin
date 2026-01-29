@@ -135,7 +135,9 @@ const Header2 = ({ title }) => {
   return (
     <div className="w-full flex flex-col pt-2 pb-3 border-b border-gray-300">
       <div className="flex items-center space-x">
-        <MdDashboard className="w-6 h-6 text-gray-600 flex-shrink-0" />
+        <Link to="/dashboard" aria-label="Go to Dashboard">
+          <MdDashboard className="w-6 h-6 text-gray-600 flex-shrink-0 cursor-pointer hover:text-blue-600 transition-colors" />
+        </Link>
         <span className="flex items-center">
           <Link to="/dashboard" className="sr-only">
             Dashboard

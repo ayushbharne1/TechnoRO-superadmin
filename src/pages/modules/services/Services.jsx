@@ -70,7 +70,16 @@ const Services = () => {
 
   const filteredRows = rows
     .filter((row) => row.category.toLowerCase().includes(search.toLowerCase()))
-    .filter((row) => (statusFilter ? row.category === statusFilter : true));
+    .filter((row) => {
+      if (!statusFilter) return true;
+      // Allow both 'AMC' and 'AMC Plan' to match the filter
+      const cat = row.category.trim().toLowerCase();
+      const filter = statusFilter.trim().toLowerCase();
+      if (filter === 'amc plan') {
+        return cat === 'amc plan' || cat === 'amc';
+      }
+      return cat === filter;
+    });
 
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
   const paginatedRows = filteredRows.slice(
