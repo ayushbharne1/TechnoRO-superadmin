@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchVendorById, toggleVendorStatus } from "../../../redux/slices/vendorSlice";
 import Header2 from "../../../components/superAdmin/header/Header2";
-import { FiPhone } from "react-icons/fi";
-import { CheckCircle, Eye, XCircle } from "lucide-react";
+import { FiPhone, FiMail, FiBriefcase, FiMapPin, FiFileText } from "react-icons/fi";
+import { CheckCircle, Eye, XCircle, Clock, Download, ExternalLink } from "lucide-react";
 import CompanyIcon from "../../../assets/company.svg";
 import AddressIcon from "../../../assets/Location.svg";
 import { toggleVendorVerification } from "../../../redux/slices/vendorSlice";
@@ -33,8 +33,9 @@ const VendorDetails = () => {
       alert("Failed to update status");
     }
   };
-  const handleVerification = async (action) =>{
-       const actionText = action === "verified" ? "verify" : "mark as unverified";
+
+  const handleVerification = async (action) => {
+    const actionText = action === "verified" ? "verify" : "mark as unverified";
     if (!window.confirm(`Are you sure you want to ${actionText} this Vendor's verification?`)) {
       return;
     }
@@ -43,7 +44,6 @@ const VendorDetails = () => {
       alert(`Vendor verification ${action === "verified" ? "verified" : "set to unverified"} successfully!`);
       dispatch(fetchVendorById(id)); // Refresh the data
     } catch (error) {
-      // show full error payload if message missing to help debugging
       const msg =
         (error && (error.message || error.msg || error.error)) ||
         (typeof error === "string" ? error : null) ||
@@ -51,7 +51,25 @@ const VendorDetails = () => {
         "Failed to update verification status";
       alert(msg);
     }
-  }
+  };
+
+  /* -------------------- HELPER FUNCTIONS -------------------- */
+  const displayValue = (value) => {
+    if (value === null || value === undefined || value === "") {
+      return <span className="text-gray-400 italic">Info not available</span>;
+    }
+    return value;
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Info not available";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   /* -------------------- DUMMY DATA (SAFE) -------------------- */
   const stats = [
@@ -81,18 +99,22 @@ const VendorDetails = () => {
     <div className="min-h-screen bg-white p-4 sm:p-6 space-y-6">
       <Header2 title="Vendor Details" />
 
-      {/* =================== DETAILS CARD =================== */}
-      <div className="bg-white rounded-lg p-6 space-y-6">
-
+      {/* =================== BASIC INFO CARD =================== */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-3xl font-bold text-[#263138]">{vendor.name}</h2>
-             <div className="mt-2">
-              <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold ${
-                vendor.verificationStatus === "verified"
-                  ? "bg-green-100 text-green-700" 
-                  : vendor.verificationStatus === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
-              }`}>
+            <h2 className="text-3xl font-bold text-[#263138]">{displayValue(vendor.name)}</h2>
+            <p className="text-gray-500 mt-1">ID: {vendor._id || "N/A"}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span
+                className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold ${
+                  vendor.verificationStatus === "verified"
+                    ? "bg-green-100 text-green-700"
+                    : vendor.verificationStatus === "pending"
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
                 {vendor.verificationStatus === "verified" ? (
                   <>
                     <CheckCircle className="w-4 h-4" />
@@ -100,14 +122,23 @@ const VendorDetails = () => {
                   </>
                 ) : vendor.verificationStatus === "pending" ? (
                   <>
-                    <XCircle className="w-4 h-4" />
+                    <Clock className="w-4 h-4" />
                     Pending Verification
                   </>
-                ) : (<>
+                ) : (
+                  <>
                     <XCircle className="w-4 h-4" />
                     Not Verified
                   </>
                 )}
+              </span>
+              
+              <span
+                className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold ${
+                  vendor.otpVerified ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {vendor.otpVerified ? "OTP Verified" : "OTP Not Verified"}
               </span>
             </div>
           </div>
@@ -127,39 +158,325 @@ const VendorDetails = () => {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Address */}
+        {/* Contact Information */}
+        <div className="grid md:grid-cols-3 gap-6 pt-4 border-t">
           <div>
-            <div className="flex items-center gap-2 font-medium">
-              <img src={AddressIcon} className="w-5" />
-              Address
+            <div className="flex items-center gap-2 font-medium text-gray-700 mb-2">
+              <FiMail className="w-5 h-5" />
+              Email
             </div>
-            <p className="text-[#7EC1B1] mt-1">{vendor.address}</p>
-
-            <iframe
-              className="mt-4 h-60 w-full rounded-lg border"
-              src={`https://maps.google.com/maps?q=${encodeURIComponent(vendor.address)}&z=15&output=embed`}
-              loading="lazy"
-            />
+            <p className="text-[#7EC1B1]">{displayValue(vendor.email)}</p>
           </div>
 
-          {/* Info */}
-          <div className="space-y-6">
+          <div>
+            <div className="flex items-center gap-2 font-medium text-gray-700 mb-2">
+              <FiPhone className="w-5 h-5" />
+              Phone No.
+            </div>
+            <p className="text-[#7EC1B1]">{displayValue(vendor.phone || vendor.mobile)}</p>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 font-medium text-gray-700 mb-2">
+              <img src={CompanyIcon} className="w-5" alt="Company" />
+              Company Name
+            </div>
+            <p className="text-[#7EC1B1]">{displayValue(vendor.companyName)}</p>
+          </div>
+        </div>
+
+        {/* Dates */}
+        <div className="grid md:grid-cols-2 gap-6 pt-4 border-t">
+          <div>
+            <div className="flex items-center gap-2 font-medium text-gray-700 mb-2">
+              <Clock className="w-5 h-5" />
+              Created At
+            </div>
+            <p className="text-gray-600">{formatDate(vendor.createdAt)}</p>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 font-medium text-gray-700 mb-2">
+              <Clock className="w-5 h-5" />
+              Last Updated
+            </div>
+            <p className="text-gray-600">{formatDate(vendor.updatedAt)}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* =================== BUSINESS INFO CARD =================== */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
+        <h3 className="text-xl font-bold text-[#263138] flex items-center gap-2">
+          <FiBriefcase className="w-6 h-6" />
+          Business Information
+        </h3>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          <div>
+            <div className="font-medium text-gray-700 mb-2">Business Type</div>
+            <p className="text-[#7EC1B1] capitalize">
+              {displayValue(vendor.businessInfo?.businessType)}
+            </p>
+          </div>
+
+          <div>
+            <div className="font-medium text-gray-700 mb-2">Experience (Years)</div>
+            <p className="text-[#7EC1B1]">
+              {vendor.businessInfo?.experience ? `${vendor.businessInfo.experience} years` : displayValue(null)}
+            </p>
+          </div>
+
+          <div>
+            <div className="font-medium text-gray-700 mb-2">OTP Resend Count</div>
+            <p className="text-[#7EC1B1]">{vendor.otpResendCount ?? displayValue(null)}</p>
+          </div>
+        </div>
+
+        {/* Services Offered */}
+        <div className="pt-4 border-t">
+          <div className="font-medium text-gray-700 mb-3">Services Offered</div>
+          {vendor.businessInfo?.servicesOffered && vendor.businessInfo.servicesOffered.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {vendor.businessInfo.servicesOffered.map((service, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1.5 bg-[#F4FAF8] text-[#7EC1B1] rounded-full text-sm font-medium border border-[#7EC1B1]"
+                >
+                  {service}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-400 italic">No services listed</p>
+          )}
+        </div>
+      </div>
+
+      {/* =================== ADDRESS INFO CARD =================== */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
+        <h3 className="text-xl font-bold text-[#263138] flex items-center gap-2">
+          <img src={AddressIcon} className="w-6" alt="Address" />
+          Address Information
+        </h3>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-4">
             <div>
-              <div className="flex items-center gap-2 font-medium">
-                <img src={CompanyIcon} className="w-5" />
-                Company
+              <div className="font-medium text-gray-700 mb-2">Office Address</div>
+              <p className="text-[#7EC1B1]">{displayValue(vendor.addressInfo?.officeAddress)}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="font-medium text-gray-700 mb-2">City</div>
+                <p className="text-[#7EC1B1]">{displayValue(vendor.addressInfo?.city)}</p>
               </div>
-              <p className="text-[#7EC1B1]">{vendor.companyName}</p>
+
+              <div>
+                <div className="font-medium text-gray-700 mb-2">State</div>
+                <p className="text-[#7EC1B1] capitalize">{displayValue(vendor.addressInfo?.state)}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="font-medium text-gray-700 mb-2">Pin Code</div>
+                <p className="text-[#7EC1B1]">{displayValue(vendor.addressInfo?.pinCode)}</p>
+              </div>
+
+              <div>
+                <div className="font-medium text-gray-700 mb-2">Service Radius (km)</div>
+                <p className="text-[#7EC1B1]">
+                  {vendor.addressInfo?.serviceRadius ? `${vendor.addressInfo.serviceRadius} km` : displayValue(null)}
+                </p>
+              </div>
+            </div>
+
+            {/* Service Cities */}
+            <div>
+              <div className="font-medium text-gray-700 mb-2">Service Areas</div>
+              {vendor.addressInfo?.serviceCities && vendor.addressInfo.serviceCities.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {vendor.addressInfo.serviceCities.map((city, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-blue-50 text-blue-700 rounded-md text-sm font-medium capitalize"
+                    >
+                      {city}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400 italic">No service cities listed</p>
+              )}
+            </div>
+          </div>
+
+          {/* Map */}
+          <div>
+            {vendor.addressInfo?.officeAddress ? (
+              <iframe
+                className="h-80 w-full rounded-lg border"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                  `${vendor.addressInfo.officeAddress}, ${vendor.addressInfo.city || ""}, ${vendor.addressInfo.state || ""}`
+                )}&z=15&output=embed`}
+                loading="lazy"
+                title="Vendor Location"
+              />
+            ) : (
+              <div className="h-80 w-full rounded-lg border flex items-center justify-center bg-gray-50">
+                <p className="text-gray-400">Map not available</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* =================== BUSINESS DOCUMENTS CARD =================== */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
+        <h3 className="text-xl font-bold text-[#263138] flex items-center gap-2">
+          <FiFileText className="w-6 h-6" />
+          Business Documents
+        </h3>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* GST Document */}
+          <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold text-gray-800">GST Certificate</h4>
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  vendor.businessDocuments?.gst?.verified
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {vendor.businessDocuments?.gst?.verified ? "Verified" : "Not Verified"}
+              </span>
             </div>
 
             <div>
-              <div className="flex items-center gap-2 font-medium">
-                <FiPhone />
-                Phone No.
-              </div>
-              <p className="text-[#7EC1B1]">{vendor.mobile || vendor.phone}</p>
+              <p className="text-sm text-gray-600 mb-1">GST Number</p>
+              <p className="font-mono text-sm text-gray-800">
+                {displayValue(vendor.businessDocuments?.gst?.number)}
+              </p>
             </div>
+
+            {vendor.businessDocuments?.gst?.fileUrl ? (
+              <div className="flex gap-2">
+                <a
+                  href={vendor.businessDocuments.gst.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition text-sm"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View
+                </a>
+                <a
+                  href={vendor.businessDocuments.gst.fileUrl}
+                  download
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-gray-600 rounded hover:bg-gray-100 transition text-sm"
+                >
+                  <Download className="w-4 h-4" />
+                </a>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 italic">No file uploaded</p>
+            )}
+          </div>
+
+          {/* PAN Document */}
+          <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold text-gray-800">PAN Card</h4>
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  vendor.businessDocuments?.pan?.verified
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {vendor.businessDocuments?.pan?.verified ? "Verified" : "Not Verified"}
+              </span>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-600 mb-1">PAN Number</p>
+              <p className="font-mono text-sm text-gray-800">
+                {displayValue(vendor.businessDocuments?.pan?.number)}
+              </p>
+            </div>
+
+            {vendor.businessDocuments?.pan?.fileUrl ? (
+              <div className="flex gap-2">
+                <a
+                  href={vendor.businessDocuments.pan.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition text-sm"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View
+                </a>
+                <a
+                  href={vendor.businessDocuments.pan.fileUrl}
+                  download
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-gray-600 rounded hover:bg-gray-100 transition text-sm"
+                >
+                  <Download className="w-4 h-4" />
+                </a>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 italic">No file uploaded</p>
+            )}
+          </div>
+
+          {/* Aadhar Document */}
+          <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold text-gray-800">Aadhar Card</h4>
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  vendor.businessDocuments?.aadhar?.verified
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {vendor.businessDocuments?.aadhar?.verified ? "Verified" : "Not Verified"}
+              </span>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Aadhar Number</p>
+              <p className="font-mono text-sm text-gray-800">
+                {displayValue(vendor.businessDocuments?.aadhar?.number)}
+              </p>
+            </div>
+
+            {vendor.businessDocuments?.aadhar?.fileUrl ? (
+              <div className="flex gap-2">
+                <a
+                  href={vendor.businessDocuments.aadhar.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition text-sm"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View
+                </a>
+                <a
+                  href={vendor.businessDocuments.aadhar.fileUrl}
+                  download
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-gray-600 rounded hover:bg-gray-100 transition text-sm"
+                >
+                  <Download className="w-4 h-4" />
+                </a>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 italic">No file uploaded</p>
+            )}
           </div>
         </div>
       </div>
@@ -248,29 +565,27 @@ const VendorDetails = () => {
         </div>
       </div>
 
-      {/* =================== Account verification button =================== */}
-      { vendor.verificationStatus === "pending"  && (
-       <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
-            <button
-              onClick={() => handleVerification("rejected")}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-            >
-              <XCircle className="w-5 h-5" />
-              Reject Verification
-            </button>
-            <button
-              onClick={() => handleVerification("verified")}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-            >
-              <CheckCircle className="w-5 h-5" />
-              Verify Account
-            </button>
-          </div> ) 
-         
-      }
-      
+      {/* =================== VERIFICATION BUTTONS =================== */}
+      {vendor.verificationStatus === "pending" && (
+        <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200">
+          <button
+            onClick={() => handleVerification("rejected")}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+          >
+            <XCircle className="w-5 h-5" />
+            Reject Verification
+          </button>
+          <button
+            onClick={() => handleVerification("verified")}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+          >
+            <CheckCircle className="w-5 h-5" />
+            Verify Account
+          </button>
+        </div>
+      )}
     </div>
   );
 };
