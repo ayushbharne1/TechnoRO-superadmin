@@ -167,8 +167,14 @@ const Header = () => {
 
   return (
     <div className='flex justify-end border-b-2 pr-5 border-gray-400 shadow-lg h-[72px] items-center'>
+        <div className='pl-6 text-2xl '>
+          <h1 className='text-teal-600 font-medium font-poppins'>
+            Admin Panel
+          </h1>
+        </div>
       <div className='flex space-x-6 items-center ml-auto'>
-
+        
+        
         {/* Notifications */}
         <div className='relative flex items-center'>
           <button
@@ -177,6 +183,7 @@ const Header = () => {
           >
             <LuBell />
           </button>
+          
 
           {notifications.length > 0 && (
             <span className="absolute top-0 right-0 -translate-x-1/3 -translate-y-1/3 z-10 text-[10px] bg-red-600 text-white rounded-full px-1.5 py-0.5">
@@ -184,7 +191,7 @@ const Header = () => {
             </span>
           )}
         </div>
-
+        
         {/* Profile */}
         <div
           onClick={handleProfileClick}
@@ -196,7 +203,6 @@ const Header = () => {
             <p className='text-xs'>Designation</p>
           </div>
         </div>
-
       </div>
     </div>
   );

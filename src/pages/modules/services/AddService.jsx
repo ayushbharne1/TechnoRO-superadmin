@@ -56,12 +56,12 @@ const AddService = () => {
   };
 
   return (
-    <div className="bg-[#F5F8F9] min-h-screen flex flex-col">
+    <div className="bg-white min-h-screen flex flex-col p-4">
       {/* Header */}
       <Header2 />
 
       {/* Form Container */}
-      <div className="bg-white m-6 p-8 shadow-md rounded-md border border-gray-200 flex flex-col gap-8">
+      <div className="bg-white mt-5 flex flex-col gap-8">
         {/* Category & Service Row */}
         <div className="grid md:grid-cols-2 gap-6 w-full">
           <div className="flex flex-col gap-2">
@@ -76,14 +76,17 @@ const AddService = () => {
               <option value="">Select Category</option>
 
               {/* ✅ FIXED VALUES (BACKEND ACCEPTS ONLY THESE) */}
-              <option value="Service">Service</option>
-              <option value="AMC">AMC Plan</option>
+                <option value="">Select Category</option>
+                <option value="Service">Service</option>
+                <option value="Repairing">Repairing</option>
+                <option value="Installation">Installation</option>
+                <option value="Uninstallation">Uninstallation</option>
             </select>
           </div>
 
           <div className="flex flex-col gap-2">
             <label className="font-medium text-gray-700 text-[15px]">
-              Service/AMC Plan Name
+              Service Name
             </label>
             <input
               type="text"
@@ -112,7 +115,7 @@ const AddService = () => {
 
           <div className="flex flex-col gap-2">
             <label className="font-medium text-gray-700 text-[15px]">
-              Warranty/Validity
+              Warranty
             </label>
             <input
               type="text"
@@ -154,7 +157,7 @@ const AddService = () => {
         {/* Product Image Section */}
         <div className="flex flex-col gap-3 w-full">
           <label className="font-medium font-poppins text-gray-700 text-[15px]">
-            Product Image
+            Service Image
           </label>
 
           {/* Uploaded Images */}

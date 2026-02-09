@@ -129,6 +129,10 @@ import Blog from "../pages/modules/Blog/Blog";
 import AddBlog from "../pages/modules/Blog/AddBlog";
 import EditBlog from "../pages/modules/Blog/EditBlog";
 import ViewBlog from "../pages/modules/Blog/ViewBlog";
+import Amc from "../pages/modules/amc/Amc";
+import AddAmc from "../pages/modules/amc/AddAmc";
+import UpdateAmc from "../pages/modules/amc/UpdateAmc";
+import ViewAmc from "../pages/modules/amc/ViewAmc";
 
 const AdminLayout = () => {
   const [loading, setLoading] = useState(true);
@@ -184,6 +188,12 @@ const AdminLayout = () => {
                 element={<ServiceDetails />}
               />
               <Route path="/services/editservice" element={<EditService />} />
+
+              {/* amc */}
+              <Route path="/amc" element={<Amc />} />
+              <Route path="/amc/add" element={<AddAmc />} />
+              <Route path="/amc/update/:id" element={<UpdateAmc/>} />
+              <Route path="/amc/view/:id" element={<ViewAmc />} />
 
               {/* PRODUCT */}
               <Route path="/product" element={<Product />} />

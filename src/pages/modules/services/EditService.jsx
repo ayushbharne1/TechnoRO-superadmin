@@ -144,7 +144,7 @@ const EditService = () => {
 
                     <div className="flex flex-col gap-2">
                         <label className="font-medium text-gray-700 text-[15px]">
-                            Service/AMC Plan Name
+                            Service
                         </label>
                         <input
                             type="text"
@@ -175,7 +175,7 @@ const EditService = () => {
 
                     <div className="flex flex-col gap-2">
                         <label className="font-medium text-gray-700 text-[15px]">
-                            Warranty/Validity
+                            Warranty
                         </label>
                         <input
                             type="text"
@@ -220,7 +220,7 @@ const EditService = () => {
                 {/* Product Image Section */}
                 <div className="flex flex-col gap-3 w-full">
                     <label className="font-medium font-poppins text-gray-700 text-[15px]">
-                        Product Image
+                        Service Image
                     </label>
 
 
@@ -229,10 +229,11 @@ const EditService = () => {
                         {images.map((img, index) => (
                             <div key={index} className="relative w-80 h-36 rounded-md overflow-hidden border border-gray-300 bg-[#F9F9F9] flex items-center justify-center">
                                 <img
-                                    src={URL.createObjectURL(img)}
-                                    alt="Uploaded"
-                                    className="w-full h-full object-contain"
-                                />
+  src={typeof img === "string" ? img : URL.createObjectURL(img)}
+  alt="Uploaded"
+  className="w-full h-full object-contain"
+/>
+
                                 <button
                                     onClick={() => handleDeleteImage(index)}
                                     className="absolute top-1 right-1 bg-white rounded-full p-1 shadow hover:bg-red-100"
