@@ -70,6 +70,21 @@ export const updateService = createAsyncThunk(
   }
 );
 
+/* ================== DELETE SERVICE (DELETE) ================== */
+export const deleteService = createAsyncThunk(
+  "service/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${API_URL}/${id}`, {
+        headers: authHeaders(),
+      });
+      return id;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 const serviceSlice = createSlice({
   name: "service",
   initialState: {
@@ -140,6 +155,19 @@ const serviceSlice = createSlice({
         }
       })
       .addCase(updateService.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      /* ===== DELETE ===== */
+      .addCase(deleteService.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteService.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = state.list.filter((item) => item._id !== action.payload);
+      })
+      .addCase(deleteService.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

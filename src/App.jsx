@@ -5,11 +5,14 @@ import AdminLayout from "./layouts/AdminLayout";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import VerifyOtp from "./pages/auth/VerifyOtp"
 import ResetPassword from "./pages/auth/ResetPassword";
+import { ToastContainer } from "react-toastify";
 
 
 function App() {
   return (
-    <BrowserRouter>
+    <>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" />
+        <BrowserRouter>
       {/* Wrap everything in hide-scrollbar */}
       <div className="hide-scrollbar h-screen">
         <Routes>
@@ -30,6 +33,8 @@ function App() {
         </Routes>
       </div>
     </BrowserRouter>
+    </>
+
   );
 }
 
