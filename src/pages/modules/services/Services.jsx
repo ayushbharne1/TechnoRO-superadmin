@@ -109,13 +109,16 @@ const Services = () => {
       // swal.fire("Deleted!", "Your service has been deleted.", "success");
     }
   }
+  const handleAddCategory = () => {
+    navigate("/services/category/add");
+  }
 
   return (
     <div className="bg-white p-4 h-full overflow-y-auto flex flex-col gap-6">
       <Header2 />
 
       <div className="bg-white  flex flex-col gap-4 overflow-x-auto">
-        {loading && <p className="text-center py-2">Loading services...</p>}
+        
 
         {/* Top Controls */}
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
@@ -167,7 +170,12 @@ const Services = () => {
               </select>
             </div>
           </div>
-
+          <button
+            onClick={handleAddCategory}
+            className="w-full sm:w-[200px] h-[40px] bg-[#7EC1B1] text-white rounded-lg font-poppins text-[16px]"
+          >
+            Add Service Category
+          </button>
           <button
             onClick={handleClick}
             className="w-full sm:w-[200px] h-[40px] bg-[#7EC1B1] text-white rounded-lg font-poppins text-[16px]"
@@ -198,7 +206,15 @@ const Services = () => {
                 <th className="p-2 md:p-3 font-poppins font-medium">Action</th>
               </tr>
             </thead>
-            <tbody className="text-center text-sm md:text-base">
+            {loading ? (
+              <tbody>
+                <tr>
+                  <td colSpan={7} className="text-center p-6 text-gray-500">
+                    Loading...
+                  </td>
+                </tr>
+              </tbody>
+            ) : <tbody className="text-center text-sm md:text-base">
               {paginatedRows.map((row) => (
                 <tr
                   key={row.id}
@@ -267,7 +283,8 @@ const Services = () => {
                   </td>
                 </tr>
               ))}
-            </tbody>
+            </tbody>}
+            
           </table>
         </div>
 

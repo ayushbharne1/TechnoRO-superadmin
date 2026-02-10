@@ -133,6 +133,9 @@ import Amc from "../pages/modules/amc/Amc";
 import AddAmc from "../pages/modules/amc/AddAmc";
 import UpdateAmc from "../pages/modules/amc/UpdateAmc";
 import ViewAmc from "../pages/modules/amc/ViewAmc";
+import AddCategory from "../pages/modules/services/AddCategory";
+import ServiceRequest from "../pages/modules/services/serviceRequest/ServiceRequest";
+import ServiceRequestDetail from "../pages/modules/services/serviceRequest/ServiceRequestDetail";
 
 const AdminLayout = () => {
   const [loading, setLoading] = useState(true);
@@ -151,7 +154,7 @@ const AdminLayout = () => {
   const isAuthPage = ["/", "/signup"].includes(location.pathname);
 
   return (
-    <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
+    <div className="flex h-screen w-full bg-gray-50 overflow-hidden ">
       {/* Sidebar */}
       {!isAuthPage && <Sidebar />}
 
@@ -160,7 +163,7 @@ const AdminLayout = () => {
         {!isAuthPage && <Header />}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto bg-[#eef5f3]">
+        <main className="flex-1 overflow-auto bg-[#eef5f3] p-4">
           <ResponsiveLayout>
             <div className="w-full h-full">
               <Routes>
@@ -182,12 +185,15 @@ const AdminLayout = () => {
               <Route path="/services/addservice" element={<AddService />} />
 
               <Route path="/services/addservice" element={<AddService />} />
+              <Route path="/services/category/add" element={<AddCategory />} />
 
               <Route
                 path="/services/servicedetails"
                 element={<ServiceDetails />}
               />
               <Route path="/services/editservice" element={<EditService />} />
+              <Route path="/service-request" element={<ServiceRequest />} />
+              <Route path="/service-request/view/:id" element={<ServiceRequestDetail />} />
 
               {/* amc */}
               <Route path="/amc" element={<Amc />} />

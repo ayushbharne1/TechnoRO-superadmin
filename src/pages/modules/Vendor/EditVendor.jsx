@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchVendorById, updateVendor } from "../../../redux/slices/vendorSlice";
 import Header2 from "../../../components/superAdmin/header/Header2";
+import { toast } from "react-toastify";
 
 const EditVendor = () => {
   const { id } = useParams();
@@ -85,7 +86,7 @@ const EditVendor = () => {
 
     try {
       await dispatch(updateVendor({ id, data: payload })).unwrap();
-      alert("Vendor updated successfully!");
+      toast.success("Vendor updated successfully!");
       navigate("/vendors");
     } catch (err) {
       console.error("Update failed:", err);

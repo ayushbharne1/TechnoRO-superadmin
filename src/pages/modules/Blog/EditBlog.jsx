@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import JoditEditor from "jodit-pro-react";
+import { toast } from "react-toastify";
 
 // Dummy Blog Data (same as Blog.jsx)
 const DUMMY_BLOGS = [
@@ -175,7 +176,7 @@ const EditBlog = () => {
       // In real implementation, dispatch Redux action here
       // await dispatch(updateBlog({ id, data: formData })).unwrap();
       
-      alert("Blog updated successfully!");
+      toast.success("Blog updated successfully!");
       navigate("/blog");
     } catch (err) {
       setError(err.message || "Failed to update blog");

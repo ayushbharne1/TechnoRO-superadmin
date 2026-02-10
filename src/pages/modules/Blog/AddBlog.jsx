@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import JoditEditor from "jodit-pro-react";
+import { toast } from "react-toastify";
 
 const AddBlog = () => {
   const navigate = useNavigate();
@@ -104,7 +105,7 @@ const AddBlog = () => {
       // In real implementation, dispatch Redux action here
       // await dispatch(addBlog(formData)).unwrap();
       
-      alert("Blog added successfully!");
+      toast.success("Blog added successfully!");
       navigate("/blog");
     } catch (err) {
       setError(err.message || "Failed to add blog");

@@ -4,6 +4,7 @@ import Header2 from "../../../components/superAdmin/header/Header2";
 import DeleteIcon from "../../../assets/delete.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AddService = () => {
   const dispatch = useDispatch();
@@ -36,14 +37,14 @@ const AddService = () => {
       navigate("/services");
     } catch (error) {
       console.error("API Error:", error);
-      alert(error?.message || "Failed to add service");
+      toast.error(error?.message || "Failed to add service");
     }
   };
 
   const handleImageUpload = (e) => {
     const selectedFiles = Array.from(e.target.files);
     if (images.length + selectedFiles.length > 3) {
-      alert("You can upload a maximum of 3 images.");
+      toast.warn("You can upload a maximum of 3 images.");
       return;
     }
     setImages([...images, ...selectedFiles]);
