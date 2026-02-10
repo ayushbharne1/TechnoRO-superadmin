@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PreviewIcon from "../../../assets/preview1.svg";
 import EditIcon from "../../../assets/edit1.svg";
@@ -6,42 +6,31 @@ import Deleteicon from "../../../assets/delete.svg";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import SearchIcon from "../../../assets/search.png";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchServices, deleteService  } from "../../../redux/slices/serviceSlice";
+import { fetchServices, deleteService } from "../../../redux/slices/serviceSlice";
+import { fetchAllCategories } from "../../../redux/slices/CategorySlice";
 import swal from "sweetalert2";
 import { toast } from "react-toastify";
 
 const Services = () => {
-  // const [rows, setRows] = useState([
-  //   { id: 1, category: "Service", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-  //   { id: 2, category: "AMC Plan", serviceAMC: "Silver Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹1899.00", warrenty: "1 Year", discount: "10%" },
-  //   { id: 3, category: "Service", serviceAMC: "Gold Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹2899.00", warrenty: "1 Year", discount: "10%" },
-  //   { id: 4, category: "AMC Plan", serviceAMC: "Dimond Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹3899.00", warrenty: "1 Year", discount: "10%" },
-  //   { id: 5, category: "AMC Plan", serviceAMC: "Platinum Annual Maintenance Contract (AMC) Plan Premium Service.", price: "₹4899.00", warrenty: "1 Year", discount: "10%" },
-  //   { id: 6, category: "Service", serviceAMC: "Installation RO Water Purifier Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-  //   { id: 7, category: "AMC Plan", serviceAMC: "Uninstallation RO Water Purifier Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-  //   { id: 8, category: "AMC Plan", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-  //   { id: 9, category: "Service", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-  //   { id: 10, category: "AMC Plan", serviceAMC: "Water Purifier Service Maintenance Service", price: "₹899.00", warrenty: "NA", discount: "10%" },
-  // ]);
-
   const dispatch = useDispatch();
 
   const { list: apiRows = [], loading } = useSelector((state) => state.service);
+  const { categories = [] } = useSelector((state) => state.category);
 
   const [rows, setRows] = useState([]);
-
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  /* ===================== 3. useEffect #1 (FETCH API) ===================== */
+  /* ===================== FETCH API DATA ===================== */
 
   useEffect(() => {
     dispatch(fetchServices());
+    dispatch(fetchAllCategories());
   }, [dispatch]);
 
-  /* ===================== 4. useEffect #2 (API → UI MAPPING) ===================== */
+  /* ===================== MAP API DATA TO UI ===================== */
 
   useEffect(() => {
     if (!apiRows.length) return;
@@ -92,6 +81,7 @@ const Services = () => {
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) setPage(newPage);
   };
+
   const handleDelete = async (id) => {
     const result = await swal.fire({
       title: "Are you sure?",
@@ -106,23 +96,21 @@ const Services = () => {
     if (result.isConfirmed) {
       dispatch(deleteService(id));
       toast.success("Service deleted successfully");
-      // swal.fire("Deleted!", "Your service has been deleted.", "success");
     }
-  }
+  };
+
   const handleAddCategory = () => {
     navigate("/services/category/add");
-  }
+  };
 
   return (
     <div className="bg-white p-4 h-full overflow-y-auto flex flex-col gap-6">
       <Header2 />
 
-      <div className="bg-white  flex flex-col gap-4 overflow-x-auto">
-        
-
+      <div className="bg-white flex flex-col gap-4 overflow-x-auto">
         {/* Top Controls */}
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-          <div className="flex flex-wrap items-center gap-4 ">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2 flex-wrap text-sm md:text-base mr-10">
               <span>Show</span>
               <select
@@ -130,7 +118,7 @@ const Services = () => {
                 onChange={handleRowsPerPage}
                 className="p-1 md:p-2 border rounded bg-gray-100 w-[60px]"
               >
-                {[10,20,30,40,50].map((num) => (
+                {[10, 20, 30, 40, 50].map((num) => (
                   <option key={num} value={num}>
                     {num}
                   </option>
@@ -163,10 +151,13 @@ const Services = () => {
                 className="p-1 md:p-2 border rounded w-full md:w-[200px] text-sm md:text-base bg-gray-100"
               >
                 <option value="">Select Category</option>
-                <option value="Service">Service</option>
-                <option value="Repairing">Repairing</option>
-                <option value="Installation">Installation</option>
-                <option value="Uninstallation">Uninstallation</option>
+                {categories
+                  .filter((cat) => cat)
+                  .map((category) => (
+                    <option key={category._id} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
               </select>
             </div>
           </div>
@@ -214,77 +205,79 @@ const Services = () => {
                   </td>
                 </tr>
               </tbody>
-            ) : <tbody className="text-center text-sm md:text-base">
-              {paginatedRows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="bg-white text-black block md:table-row mb-4 md:mb-0 p-2 md:p-0 rounded-lg shadow md:shadow-none"
-                >
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Sr. No.: </span>
-                    {row.id}
-                  </td>
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Category: </span>
-                    {row.category}
-                  </td>
-                  <td
-                    className="p-2 md:p-3 block md:table-cell text-left md:text-center max-w-full sm:truncate md:max-w-[200px]"
-                    title={row.serviceAMC}
+            ) : (
+              <tbody className="text-center text-sm md:text-base">
+                {paginatedRows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="bg-white text-black block md:table-row mb-4 md:mb-0 p-2 md:p-0 rounded-lg shadow md:shadow-none"
                   >
-                    <span className="md:hidden font-semibold">
-                      Service/AMC:{" "}
-                    </span>
-                    {row.serviceAMC}
-                  </td>
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Price: </span>
-                    {row.price}
-                  </td>
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Warrenty: </span>
-                    {row.warrenty}
-                  </td>
-                  <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                    <span className="md:hidden font-semibold">Discount: </span>
-                    {row.discount}
-                  </td>
-                  <td className="p-2 md:p-3 flex gap-2 justify-start md:justify-center flex-wrap">
-                    <span className="md:hidden font-semibold">Action: </span>
-                    <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
-                      <img
-                        src={PreviewIcon}
-                        onClick={() =>
-                          navigate2("/services/servicedetails", { state: row })
-                        }
-                        alt="preview"
-                        className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
-                      />
-                    </div>
-                    <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
-                      <img
-                        src={EditIcon}
-                        onClick={() =>
-                          navigate3("/services/editservice", { state: row })
-                        }
-                        alt="edit"
-                        className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
-                      />
-                    </div>
-                    <div 
-                    onClick={() => handleDelete(row._id)}
-                    className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
-                      <img
-                        src={Deleteicon}
-                        alt="delete"
-                        className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>}
-            
+                    <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
+                      <span className="md:hidden font-semibold">Sr. No.: </span>
+                      {row.id}
+                    </td>
+                    <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
+                      <span className="md:hidden font-semibold">Category: </span>
+                      {row.category}
+                    </td>
+                    <td
+                      className="p-2 md:p-3 block md:table-cell text-left md:text-center max-w-full sm:truncate md:max-w-[200px]"
+                      title={row.serviceAMC}
+                    >
+                      <span className="md:hidden font-semibold">
+                        Service/AMC:{" "}
+                      </span>
+                      {row.serviceAMC}
+                    </td>
+                    <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
+                      <span className="md:hidden font-semibold">Price: </span>
+                      {row.price}
+                    </td>
+                    <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
+                      <span className="md:hidden font-semibold">Warrenty: </span>
+                      {row.warrenty}
+                    </td>
+                    <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
+                      <span className="md:hidden font-semibold">Discount: </span>
+                      {row.discount}
+                    </td>
+                    <td className="p-2 md:p-3 flex gap-2 justify-start md:justify-center flex-wrap">
+                      <span className="md:hidden font-semibold">Action: </span>
+                      <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
+                        <img
+                          src={PreviewIcon}
+                          onClick={() =>
+                            navigate2("/services/servicedetails", { state: row })
+                          }
+                          alt="preview"
+                          className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                        />
+                      </div>
+                      <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
+                        <img
+                          src={EditIcon}
+                          onClick={() =>
+                            navigate3("/services/editservice", { state: row })
+                          }
+                          alt="edit"
+                          className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                        />
+                      </div>
+                      <div
+                        onClick={() => handleDelete(row._id)}
+                        className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded"
+                      >
+                        <img
+                          src={Deleteicon}
+                          alt="delete"
+                          className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            )}
           </table>
         </div>
 

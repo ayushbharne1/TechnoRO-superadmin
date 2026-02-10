@@ -1,60 +1,73 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import EditIcon from "../../../assets/edit1.svg";
 import Deleteicon from "../../../assets/delete.svg";
 import { toast } from "react-toastify";
+import {
+  fetchAllCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  clearMessages,
+} from "../../../redux/slices/CategorySlice";
 
 const AddCategory = () => {
+  const dispatch = useDispatch();
+  const { categories, loading, error, success } = useSelector(
+    (state) => state.category
+  );
+
   const [categoryName, setCategoryName] = useState("");
-  const [categories, setCategories] = useState([
-    { id: 1, name: "Air Conditioner", createdAt: "2024-01-15" },
-    { id: 2, name: "Refrigerator", createdAt: "2024-01-16" },
-    { id: 3, name: "Washing Machine", createdAt: "2024-01-17" },
-    { id: 4, name: "Microwave Oven", createdAt: "2024-01-18" },
-    { id: 5, name: "Water Purifier", createdAt: "2024-01-19" },
-  ]);
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState("");
 
+  // Fetch categories on component mount
+  useEffect(() => {
+    dispatch(fetchAllCategories());
+  }, [dispatch]);
+
+  // Handle success and error messages
+  useEffect(() => {
+    if (success) {
+      // toast.success(success);
+      dispatch(clearMessages());
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(clearMessages());
+    }
+  }, [success, error, dispatch]);
+
   // Handle adding new category
-  const handleAddCategory = (e) => {
+  const handleAddCategory = async (e) => {
     e.preventDefault();
     if (categoryName.trim() === "") {
       toast.warn("Please enter a category name");
       return;
     }
 
-    const newCategory = {
-      id: categories.length + 1,
-      name: categoryName,
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-
-    setCategories([...categories, newCategory]);
+    await dispatch(createCategory({ name: categoryName }));
+    toast.success("Category added successfully");
     setCategoryName("");
-    toast.success("Category added successfully!");
   };
 
   // Handle edit button click
   const handleEditClick = (category) => {
-    setEditingId(category.id);
+    setEditingId(category._id);
     setEditingName(category.name);
   };
 
   // Handle save edit
-  const handleSaveEdit = (id) => {
+  const handleSaveEdit = async (id) => {
     if (editingName.trim() === "") {
       toast.warn("Category name cannot be empty");
       return;
     }
 
-    const updatedCategories = categories.map((cat) =>
-      cat.id === id ? { ...cat, name: editingName } : cat
-    );
-    setCategories(updatedCategories);
+    await dispatch(updateCategory({ id, categoryData: { name: editingName } }));
     setEditingId(null);
     setEditingName("");
-    toast.success("Category updated successfully!");
   };
 
   // Handle cancel edit
@@ -66,9 +79,7 @@ const AddCategory = () => {
   // Handle delete category
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      const updatedCategories = categories.filter((cat) => cat.id !== id);
-      setCategories(updatedCategories);
-      toast.success("Category deleted successfully!");
+      dispatch(deleteCategory(id));
     }
   };
 
@@ -96,12 +107,14 @@ const AddCategory = () => {
               onChange={(e) => setCategoryName(e.target.value)}
               placeholder="Enter category name"
               className="flex-1 p-2 md:p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7EC1B1] bg-white"
+              disabled={loading}
             />
             <button
               type="submit"
-              className="w-full md:w-auto px-6 py-2 md:py-3 bg-[#7EC1B1] text-white rounded-lg font-poppins text-base hover:bg-[#6db09f] transition-colors"
+              disabled={loading}
+              className="w-full md:w-auto px-6 py-2 md:py-3 bg-[#7EC1B1] text-white rounded-lg font-poppins text-base hover:bg-[#6db09f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Add Category
+              {loading ? "Adding..." : "Add Category"}
             </button>
           </div>
         </form>
@@ -112,7 +125,9 @@ const AddCategory = () => {
             All Categories ({categories.length})
           </h3>
 
-          {categories.length === 0 ? (
+          {loading && categories.length === 0 ? (
+            <p className="text-center text-gray-500 py-8">Loading categories...</p>
+          ) : categories.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
               No categories added yet. Add your first category above.
             </p>
@@ -127,9 +142,9 @@ const AddCategory = () => {
                     <th className="p-2 md:p-3 font-poppins font-medium border-b border-gray-300">
                       Category Name
                     </th>
-                    <th className="p-2 md:p-3 font-poppins font-medium border-b border-gray-300">
-                      Created Date
-                    </th>
+                    {/* <th className="p-2 md:p-3 font-poppins font-medium border-b border-gray-300">
+                      Status
+                    </th> */}
                     <th className="p-2 md:p-3 font-poppins font-medium border-b border-gray-300">
                       Actions
                     </th>
@@ -138,7 +153,7 @@ const AddCategory = () => {
                 <tbody className="text-center text-sm md:text-base">
                   {categories.map((category, index) => (
                     <tr
-                      key={category.id}
+                      key={category._id}
                       className="bg-white text-black block md:table-row mb-4 md:mb-0 p-2 md:p-0 rounded-lg shadow md:shadow-none border-b border-gray-200"
                     >
                       <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
@@ -152,7 +167,7 @@ const AddCategory = () => {
                         <span className="md:hidden font-semibold">
                           Category:{" "}
                         </span>
-                        {editingId === category.id ? (
+                        {editingId === category._id ? (
                           <input
                             type="text"
                             value={editingName}
@@ -165,28 +180,38 @@ const AddCategory = () => {
                         )}
                       </td>
 
-                      <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
+                      {/* <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
                         <span className="md:hidden font-semibold">
-                          Created:{" "}
+                          Status:{" "}
                         </span>
-                        {category.createdAt}
-                      </td>
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${
+                            category.isActive
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {category.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </td> */}
 
                       <td className="p-2 md:p-3 flex gap-2 justify-start md:justify-center flex-wrap">
                         <span className="md:hidden font-semibold">
                           Actions:{" "}
                         </span>
-                        {editingId === category.id ? (
+                        {editingId === category._id ? (
                           <>
                             <button
-                              onClick={() => handleSaveEdit(category.id)}
-                              className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm"
+                              onClick={() => handleSaveEdit(category._id)}
+                              disabled={loading}
+                              className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm disabled:opacity-50"
                             >
                               Save
                             </button>
                             <button
                               onClick={handleCancelEdit}
-                              className="px-3 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 transition-colors text-sm"
+                              disabled={loading}
+                              className="px-3 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 transition-colors text-sm disabled:opacity-50"
                             >
                               Cancel
                             </button>
@@ -198,15 +223,15 @@ const AddCategory = () => {
                                 src={EditIcon}
                                 onClick={() => handleEditClick(category)}
                                 alt="edit"
-                                className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                                className="w-4 h-4 md:w-5 md:h-5 cursor-pointer hover:opacity-70"
                               />
                             </div>
                             <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
                               <img
                                 src={Deleteicon}
-                                onClick={() => handleDelete(category.id)}
+                                onClick={() => handleDelete(category._id)}
                                 alt="delete"
-                                className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                                className="w-4 h-4 md:w-5 md:h-5 cursor-pointer hover:opacity-70"
                               />
                             </div>
                           </>

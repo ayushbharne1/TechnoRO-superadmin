@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { addService } from "../../../redux/slices/serviceSlice";
 import Header2 from "../../../components/superAdmin/header/Header2";
 import DeleteIcon from "../../../assets/delete.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { fetchAllCategories } from "../../../redux/slices/CategorySlice";
 
 const AddService = () => {
   const dispatch = useDispatch();
@@ -20,7 +21,13 @@ const AddService = () => {
   const [description, setDescription] = useState("");
   const [images, setImages] = useState([]);
 
+    /* ===================== FETCH ALL CATEGORIES ===================== */
+    useEffect(() => {
+        dispatch(fetchAllCategories());
+    }, [dispatch]);
+    const { categories = [] } = useSelector((state) => state.category);
   /* ================= ADD SERVICE (POST API) ================= */
+
   const handleAdd = async () => {
     try {
       const payload = {
@@ -75,13 +82,11 @@ const AddService = () => {
               className="p-3 border border-gray-300 rounded bg-[#F9F9F9] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
             >
               <option value="">Select Category</option>
-
-              {/* ✅ FIXED VALUES (BACKEND ACCEPTS ONLY THESE) */}
-                <option value="">Select Category</option>
-                <option value="Service">Service</option>
-                <option value="Repairing">Repairing</option>
-                <option value="Installation">Installation</option>
-                <option value="Uninstallation">Uninstallation</option>
+              {categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.name}
+                </option>
+              ))}
             </select>
           </div>
 
