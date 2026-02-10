@@ -3,18 +3,17 @@ import adminAuthReducer from "../redux/slices/authslice";
 import manufacturerReducer from "./slices/manufacturerSlice";
 import popularCitiesReducer from "./slices/popularCitiesSlice";
 import vendorReducer from "./slices/vendorSlice";
-import serviceEngineerReducer from "../redux/slices/serviceEngineerSlice" 
+import serviceEngineerReducer from "../redux/slices/serviceEngineerSlice";
 import serviceReducer from "./slices/serviceSlice";
-import productReducer from './slices/productSlice'; 
+import productReducer from "./slices/productSlice";
 import adminProfileReducer from "../redux/slices/adminProfileSlice";
-import leadReducer from '../redux/slices/leadSlice';
+import leadReducer from "../redux/slices/leadSlice";
 import rolesReducer from "./slices/rolesSlice";
-import orderReducer from "../redux/slices/orderSlice"
-
+import orderReducer from "../redux/slices/orderSlice";
+import categoryReducer from "../redux/slices/CategorySlice"; 
 
 export const store = configureStore({
   reducer: {
-    // auth: authReducer,
     adminAuth: adminAuthReducer,
     manufacturer: manufacturerReducer,
     popularCities: popularCitiesReducer,
@@ -26,7 +25,7 @@ export const store = configureStore({
     leads: leadReducer,
     role: rolesReducer,
     order: orderReducer,
-    
+    category: categoryReducer, // Add this line
   },
   devTools: import.meta.env.MODE !== "production",
 });

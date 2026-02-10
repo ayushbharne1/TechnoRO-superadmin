@@ -6,6 +6,7 @@ import {
   fetchServiceById,
   updateService,
 } from "../../../redux/slices/serviceSlice";
+import { fetchAllCategories } from "../../../redux/slices/CategorySlice";
 
 import DeleteIcon from "../../../assets/delete.svg";
 import { toast } from "react-toastify";
@@ -31,6 +32,12 @@ const EditService = () => {
   const { current, loading } = useSelector(
     (state) => state.service
   );
+
+  /* ===================== FETCH ALL CATEGORIES ===================== */
+  useEffect(() => {
+    dispatch(fetchAllCategories());
+  }, [dispatch]);
+  const { categories = [] } = useSelector((state) => state.category);
 
   /* ===================== FETCH SERVICE BY ID ===================== */
   useEffect(() => {
@@ -137,9 +144,12 @@ const EditService = () => {
                             className="p-3 border border-gray-300 rounded bg-[#F9F9F9] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
                         >
                             <option value="">Select Category</option>
-                            <option value="Service">Service</option>
-                            <option value="AMC">AMC Plan</option>
-                        </select>
+                            {categories.map((category) => (
+                                <option key={category._id} value={category._id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>   
                     </div>
 
 
