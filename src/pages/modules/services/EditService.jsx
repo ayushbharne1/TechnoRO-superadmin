@@ -8,6 +8,7 @@ import {
 } from "../../../redux/slices/serviceSlice";
 
 import DeleteIcon from "../../../assets/delete.svg";
+import { toast } from "react-toastify";
 
 const EditService = () => {
   /* ===================== LOCAL STATE ===================== */
@@ -57,7 +58,7 @@ const EditService = () => {
 
   const handleAdd = async () => {
     if (service.trim().length < 3) {
-      alert("Service name must be at least 3 characters");
+      toast.warn("Service name must be at least 3 characters");
       return;
     }
 
@@ -86,7 +87,7 @@ const EditService = () => {
       navigate("/services");
     } catch (error) {
       console.error("UPDATE ERROR:", error);
-      alert(
+      toast.error(
         error?.errors?.[0]?.message ||
           error?.message ||
           "Failed to update service"
@@ -99,7 +100,7 @@ const EditService = () => {
   const handleImageUpload = (e) => {
     const selectedFiles = Array.from(e.target.files);
     if (images.length + selectedFiles.length > 3) {
-      alert("You can upload a maximum of 3 images.");
+      toast.warn("You can upload a maximum of 3 images.");
       return;
     }
     setImages([...images, ...selectedFiles]);

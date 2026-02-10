@@ -120,7 +120,7 @@ const UpdateAmc = () => {
     console.log("Updated Form Data:", formData);
     console.log("Remaining Existing Images:", existingImages);
     // Add your API call or form submission logic here
-    alert("AMC Plan updated successfully!");
+    toast.success("AMC Plan updated successfully!");
     navigate(-1);
   };
 

@@ -195,9 +195,13 @@ export const sidebarItems = [
           </div>
         ),
       },
-
+    ],
+  },
+    {
+    groupName: "Service Management",
+    groupItems: [
       {
-        id: 2,
+        id: 1,
         name: "Services",
         path: "/services",
         icon: (
@@ -214,6 +218,16 @@ export const sidebarItems = [
           </div>
         ),
       },
+                  {
+        id: 2,
+        name: "Service Request",
+        path: "/service-request",
+        icon: (
+          <div className="w-6 h-6 hover:text-white">
+            <MdArticle />
+          </div>
+        ),
+      },
       {
         id: 3,
         name: "AMC Plan",
@@ -224,6 +238,7 @@ export const sidebarItems = [
           </div>
         ),
       },
+
     ],
   },
   {

@@ -8,6 +8,8 @@ import { CheckCircle, Eye, XCircle, Clock, Download, ExternalLink } from "lucide
 import CompanyIcon from "../../../assets/company.svg";
 import AddressIcon from "../../../assets/Location.svg";
 import { toggleVendorVerification } from "../../../redux/slices/vendorSlice";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const VendorDetails = () => {
   const { id } = useParams();
@@ -30,28 +32,43 @@ const VendorDetails = () => {
     try {
       await dispatch(toggleVendorStatus(id)).unwrap();
     } catch {
-      alert("Failed to update status");
+      toast.error("Failed to update status");
     }
   };
 
-  const handleVerification = async (action) => {
-    const actionText = action === "verified" ? "verify" : "mark as unverified";
-    if (!window.confirm(`Are you sure you want to ${actionText} this Vendor's verification?`)) {
-      return;
-    }
-    try {
-      await dispatch(toggleVendorVerification({ id, action })).unwrap();
-      alert(`Vendor verification ${action === "verified" ? "verified" : "set to unverified"} successfully!`);
-      dispatch(fetchVendorById(id)); // Refresh the data
-    } catch (error) {
-      const msg =
-        (error && (error.message || error.msg || error.error)) ||
-        (typeof error === "string" ? error : null) ||
-        JSON.stringify(error) ||
-        "Failed to update verification status";
-      alert(msg);
-    }
-  };
+const handleVerification = async (action) => {
+  const actionText = action === "verified" ? "verify" : "mark as unverified";
+
+  const confirm = await Swal.fire({
+    title: `Are you sure you want to ${actionText} this vendor?`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes, do it!",
+    cancelButtonText: "Cancel",
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  try {
+    await dispatch(toggleVendorVerification({ id, action })).unwrap();
+
+    toast.success(
+      `Vendor verification ${
+        action === "verified" ? "verified" : "set to unverified"
+      } successfully!`
+    );
+
+    dispatch(fetchVendorById(id)); // refresh data
+  } catch (error) {
+    const msg =
+      error?.message ||
+      error?.msg ||
+      error?.error ||
+      "Failed to update verification status";
+
+    toast.error(msg);
+  }
+};
 
   /* -------------------- HELPER FUNCTIONS -------------------- */
   const displayValue = (value) => {

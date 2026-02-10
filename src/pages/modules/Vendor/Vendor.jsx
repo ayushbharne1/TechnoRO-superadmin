@@ -35,7 +35,7 @@ const Vendor = () => {
 
   // CORRECTED: This function now informs the user that delete is not available.
   const handleDeleteClick = () => {
-    alert("As per the API documentation, a delete function is not available for vendors.");
+    toast.error("As per the API documentation, a delete function is not available for vendors.");
   };
 
   const handleRowsPerPage = (e) => {

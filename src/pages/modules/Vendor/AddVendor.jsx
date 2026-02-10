@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addVendor } from "../../../redux/slices/vendorSlice";
 import Header2 from "../../../components/superAdmin/header/Header2";
+import { toast } from "react-toastify";
 
 const AddVendor = () => {
   const dispatch = useDispatch();
@@ -89,7 +90,7 @@ const AddVendor = () => {
     setError("");
     try {
       await dispatch(addVendor(payload)).unwrap();
-      alert("Vendor added successfully!");
+      toast.success("Vendor added successfully!");
       navigate("/vendors");
     } catch (err) {
       console.error("Failed to add vendor:", err);

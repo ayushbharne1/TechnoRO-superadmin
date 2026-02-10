@@ -5,6 +5,7 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import { GoEye } from "react-icons/go";
 import { FiSearch } from "react-icons/fi";
 import Header2 from "../../../components/superAdmin/header/Header2";
+import { toast } from "react-toastify";
 
 // Dummy Blog Data
 const DUMMY_BLOGS = [
@@ -71,7 +72,7 @@ const Blog = () => {
   const handleDelete = (row) => {
     if (window.confirm(`Are you sure you want to delete "${row.title}"?`)) {
       setRows((prev) => prev.filter((item) => item._id !== row._id));
-      alert("Blog deleted successfully!");
+      toast.success("Blog deleted successfully!");
     }
   };
 

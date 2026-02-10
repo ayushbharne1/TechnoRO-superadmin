@@ -85,7 +85,7 @@ const AddAmc = () => {
     e.preventDefault();
     console.log("Form Data:", formData);
     // Add your API call or form submission logic here
-    alert("AMC Plan added successfully!");
+    toast.warn("AMC Plan added successfully!");
   };
 
   // Handle cancel
