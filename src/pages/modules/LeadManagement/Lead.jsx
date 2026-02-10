@@ -95,6 +95,10 @@ const LeadManagement = () => {
     return pages;
   };
 
+  const handleClick = () => {
+    navigate("/lead-management/add");
+  }
+
   return (
     <div className="w-full max-w-full bg-white p-4 overflow-y-auto flex flex-col gap-6 font-[Poppins]">
       <Header2 title="Lead Management" />
@@ -156,6 +160,14 @@ const LeadManagement = () => {
               <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
             </select>
+          </div>
+          <div>
+            <button
+            onClick={handleClick}
+            className="w-full sm:w-[200px] h-[40px] bg-[#7EC1B1] text-white rounded-lg font-poppins text-[16px]"
+          >
+            Add lead
+          </button>
           </div>
         </div>
 

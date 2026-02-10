@@ -136,6 +136,7 @@ import ViewAmc from "../pages/modules/amc/ViewAmc";
 import AddCategory from "../pages/modules/services/AddCategory";
 import ServiceRequest from "../pages/modules/services/serviceRequest/ServiceRequest";
 import ServiceRequestDetail from "../pages/modules/services/serviceRequest/ServiceRequestDetail";
+import AddLead from "../pages/modules/LeadManagement/AddLead";
 
 const AdminLayout = () => {
   const [loading, setLoading] = useState(true);
@@ -317,6 +318,7 @@ const AdminLayout = () => {
                 path="/lead-management/view/assign-lead"
                 element={<AssignLead />}
               />
+              <Route path="lead-management/add" element={<AddLead />} />
 
               {/* {SEND NOTIFICATIONS} */}
               <Route path="/send-notification" element={<SendNotification />} />
