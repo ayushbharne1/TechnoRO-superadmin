@@ -118,7 +118,7 @@ const AddLead = () => {
   };
 
   const handleCancel = () => {
-    navigate("/leads");
+    navigate(-1);
   };
 
   return (
