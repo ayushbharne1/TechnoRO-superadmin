@@ -1,23 +1,16 @@
 // src/pages/Profile.jsx - VERIFIED AND CORRECTED
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import Header2 from "../../../components/superAdmin/header/Header2";
 import logoImage from "../../../assets/51a2667788ebcdbeeab9f107b69a80d1053e1aa1.jpg";
 import { FiPhone, FiMail, FiEdit } from "react-icons/fi";
 // import Icon from "../../../assets/logo.png";
 import SuccessIcon from "../../../assets/logo.png";
-
 import { FiX } from "react-icons/fi";
 import { FiSave } from "react-icons/fi";
-
-//
 import MdiIcon from "@mdi/react";
 import { mdiImageEditOutline } from "@mdi/js";
-//
-
 import { useDispatch, useSelector } from "react-redux";
-
 import {
   fetchAdminProfile,
   updateAdminProfile,
@@ -26,19 +19,12 @@ import {
 
 const Profile = () => {
   const navigate = useNavigate();
-
-  //
   const dispatch = useDispatch();
   const adminProfile = useSelector((state) => state.adminProfile || {});
-
   const { profile, loading } = adminProfile;
-
   const isLoading = loading ?? false;
-  //
-
   const [userImage, setUserImage] = useState(logoImage);
   const [imageFile, setImageFile] = useState(null);
-
   const [formData, setFormData] = useState({
     name: "",
     mobile: "",
@@ -172,11 +158,12 @@ const Profile = () => {
 
   return (
     <>
-      <div className="mb-6">
+
+
+      <div className="w-full bg-white">
+        <div className="mb-6 p-4 bg-white ">
         <Header2 />
       </div>
-
-      <div className="w-full">
         <div className="px-4 sm:px-6 md:px-8 py-6 mt-2 w-full mx-auto relative">
           {!isEditing && (
             <button

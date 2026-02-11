@@ -35,8 +35,7 @@ const Services = () => {
   useEffect(() => {
     if (!apiRows.length) return;
 
-    const uiRows = apiRows.map((row, index) => ({
-      id: index + 1,
+    const uiRows = apiRows.map((row) => ({
       _id: row._id,
       category: row.category,
       serviceAMC: row.name,
@@ -207,75 +206,80 @@ const Services = () => {
               </tbody>
             ) : (
               <tbody className="text-center text-sm md:text-base">
-                {paginatedRows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="bg-white text-black block md:table-row mb-4 md:mb-0 p-2 md:p-0 rounded-lg shadow md:shadow-none"
-                  >
-                    <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                      <span className="md:hidden font-semibold">Sr. No.: </span>
-                      {row.id}
-                    </td>
-                    <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                      <span className="md:hidden font-semibold">Category: </span>
-                      {row.category}
-                    </td>
-                    <td
-                      className="p-2 md:p-3 block md:table-cell text-left md:text-center max-w-full sm:truncate md:max-w-[200px]"
-                      title={row.serviceAMC}
+                {paginatedRows.map((row, index) => {
+                  // Calculate the correct serial number based on current page
+                  const serialNumber = (page - 1) * rowsPerPage + index + 1;
+                  
+                  return (
+                    <tr
+                      key={row._id}
+                      className="bg-white text-black block md:table-row mb-4 md:mb-0 p-2 md:p-0 rounded-lg shadow md:shadow-none"
                     >
-                      <span className="md:hidden font-semibold">
-                        Service/AMC:{" "}
-                      </span>
-                      {row.serviceAMC}
-                    </td>
-                    <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                      <span className="md:hidden font-semibold">Price: </span>
-                      {row.price}
-                    </td>
-                    <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                      <span className="md:hidden font-semibold">Warrenty: </span>
-                      {row.warrenty}
-                    </td>
-                    <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                      <span className="md:hidden font-semibold">Discount: </span>
-                      {row.discount}
-                    </td>
-                    <td className="p-2 md:p-3 flex gap-2 justify-start md:justify-center flex-wrap">
-                      <span className="md:hidden font-semibold">Action: </span>
-                      <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
-                        <img
-                          src={PreviewIcon}
-                          onClick={() =>
-                            navigate2("/services/servicedetails", { state: row })
-                          }
-                          alt="preview"
-                          className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
-                        />
-                      </div>
-                      <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
-                        <img
-                          src={EditIcon}
-                          onClick={() =>
-                            navigate3("/services/editservice", { state: row })
-                          }
-                          alt="edit"
-                          className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
-                        />
-                      </div>
-                      <div
-                        onClick={() => handleDelete(row._id)}
-                        className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded"
+                      <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
+                        <span className="md:hidden font-semibold">Sr. No.: </span>
+                        {serialNumber}
+                      </td>
+                      <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
+                        <span className="md:hidden font-semibold">Category: </span>
+                        {row.category}
+                      </td>
+                      <td
+                        className="p-2 md:p-3 block md:table-cell text-left md:text-center max-w-full sm:truncate md:max-w-[200px]"
+                        title={row.serviceAMC}
                       >
-                        <img
-                          src={Deleteicon}
-                          alt="delete"
-                          className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                        <span className="md:hidden font-semibold">
+                          Service/AMC:{" "}
+                        </span>
+                        {row.serviceAMC}
+                      </td>
+                      <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
+                        <span className="md:hidden font-semibold">Price: </span>
+                        {row.price}
+                      </td>
+                      <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
+                        <span className="md:hidden font-semibold">Warrenty: </span>
+                        {row.warrenty}
+                      </td>
+                      <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
+                        <span className="md:hidden font-semibold">Discount: </span>
+                        {row.discount}
+                      </td>
+                      <td className="p-2 md:p-3 flex gap-2 justify-start md:justify-center flex-wrap">
+                        <span className="md:hidden font-semibold">Action: </span>
+                        <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
+                          <img
+                            src={PreviewIcon}
+                            onClick={() =>
+                              navigate2("/services/servicedetails", { state: row })
+                            }
+                            alt="preview"
+                            className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                          />
+                        </div>
+                        <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
+                          <img
+                            src={EditIcon}
+                            onClick={() =>
+                              navigate3("/services/editservice", { state: row })
+                            }
+                            alt="edit"
+                            className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                          />
+                        </div>
+                        <div
+                          onClick={() => handleDelete(row._id)}
+                          className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded"
+                        >
+                          <img
+                            src={Deleteicon}
+                            alt="delete"
+                            className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             )}
           </table>
@@ -285,7 +289,7 @@ const Services = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-2 flex-wrap font-semibold text-gray-700 text-sm md:text-base">
           <span>
             Showing{" "}
-            {Math.min((page - 1) * rowsPerPage + 1, filteredRows.length)} to{" "}
+            {filteredRows.length === 0 ? 0 : (page - 1) * rowsPerPage + 1} to{" "}
             {Math.min(page * rowsPerPage, filteredRows.length)} of{" "}
             {filteredRows.length} entries
           </span>
@@ -293,7 +297,7 @@ const Services = () => {
             <button
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1}
-              className="px-3 py-1 md:px-4 md:py-2 border border-[#7EC1B1] rounded-lg"
+              className="px-3 py-1 md:px-4 md:py-2 border border-[#7EC1B1] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
@@ -310,8 +314,8 @@ const Services = () => {
             ))}
             <button
               onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
-              className="px-3 py-1 md:px-4 md:py-2 border border-[#7EC1B1] rounded-lg"
+              disabled={page === totalPages || totalPages === 0}
+              className="px-3 py-1 md:px-4 md:py-2 border border-[#7EC1B1] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>

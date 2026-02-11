@@ -96,7 +96,7 @@ const AddService = () => {
             </label>
             <input
               type="text"
-              placeholder="Enter Service/AMC Plan Name"
+              placeholder="Enter Service"
               value={service}
               onChange={(e) => setService(e.target.value)}
               className="p-3 border border-gray-300 rounded bg-[#F9F9F9] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
@@ -125,7 +125,7 @@ const AddService = () => {
             </label>
             <input
               type="text"
-              placeholder="Enter Warranty/Validity"
+              placeholder="Enter Warranty"
               value={warrenty}
               onChange={(e) => setWarrenty(e.target.value)}
               className="p-3 border border-gray-300 rounded bg-[#F9F9F9] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
