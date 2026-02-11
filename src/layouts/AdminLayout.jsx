@@ -169,11 +169,11 @@ const AdminLayout = () => {
             <div className="w-full h-full">
               <Routes>
               {/* AUTH */}
-              <Route path="/" element={<Login />} />
+              {/* <Route path="/" element={<Login />} /> */}
               {/* <Route path="/signup" element={<SignUp />} /> */}
-              <Route path="/forgetPassword" element={<ForgotPassword />} />
+              {/* <Route path="/forgetPassword" element={<ForgotPassword />} />
               <Route path="/verify-otp" element={<VerifyOtp />} />
-              <Route path="/resetpassword" element={<ResetPassword />} />
+              <Route path="/resetpassword" element={<ResetPassword />} /> */}
 
               {/* CORE */}
               <Route path="/dashboard" element={<Dashboard />} />

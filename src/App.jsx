@@ -17,8 +17,7 @@ function App() {
       <div className="hide-scrollbar h-screen">
         <Routes>
           {/* Public Routes */}
-          {/* Note: I changed login path to /login to avoid conflict with admin root / */}
-          <Route path="/login" element={<Login />} /> 
+          <Route path="/" element={<Login />} /> 
           <Route path="/forgetPassword" element={<ForgotPassword />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/resetpassword" element={<ResetPassword />} />
