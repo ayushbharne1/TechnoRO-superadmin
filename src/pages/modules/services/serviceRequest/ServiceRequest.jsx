@@ -1,150 +1,84 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import Header2 from "../../../../components/superAdmin/header/Header2";
 import { GoEye } from "react-icons/go";
 import { FiSearch } from "react-icons/fi";
+import { 
+  getAllServiceRequests, 
+  clearError 
+} from "../../../../redux/slices/serviceRequestSlice"; // Adjust path as needed
 
 const ServiceRequest = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Redux state
+  const { 
+    serviceRequests, 
+    totalRequests, 
+    totalPages: apiTotalPages,
+    loading, 
+    error 
+  } = useSelector((state) => state.serviceRequest);
 
   // --- Local State ---
   const [entries, setEntries] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // --- Dummy Data ---
-  const dummyRequests = [
-    {
-      _id: "1",
-      orderId: "SR-001",
-      customer: { 
-        name: "John Doe",
-        email: "john.doe@example.com",
-        phone: "+91 9876543210",
-        address: "123 Main Street, Mumbai, Maharashtra, 400001"
-      },
-      service: { 
-        type: "Service", 
-        name: "RO Repair",
-        description: "RO water purifier not working properly, need urgent repair"
-      },
-      createdAt: "2025-01-15",
-      status: "new",
-      assignedTo: "Rajesh Kumar",
-      priority: "High",
-      scheduledDate: "2025-02-15",
-      notes: "Customer prefers morning slot between 9 AM to 12 PM"
-    },
-    {
-      _id: "2",
-      orderId: "SR-002",
-      customer: { 
-        name: "Jane Smith",
-        email: "jane.smith@example.com",
-        phone: "+91 9876543211",
-        address: "456 Park Avenue, Delhi, 110001"
-      },
-      service: { 
-        type: "Service", 
-        name: "Filter Repair",
-        description: "Water filter needs replacement and cleaning"
-      },
-      createdAt: "2025-01-20",
-      status: "in-progress",
-      assignedTo: "Amit Sharma",
-      priority: "Medium",
-      scheduledDate: "2025-02-18",
-      notes: "Customer available after 2 PM"
-    },
-    {
-      _id: "3",
-      orderId: "SR-003",
-      customer: { 
-        name: "Mike Johnson",
-        email: "mike.j@example.com",
-        phone: "+91 9876543212",
-        address: "789 Lake View, Bangalore, 560001"
-      },
-      service: { 
-        type: "Service", 
-        name: "RO Cleaning",
-        description: "Regular maintenance and deep cleaning required"
-      },
-      createdAt: "2025-01-25",
-      status: "completed",
-      assignedTo: "Priya Verma",
-      priority: "Low",
-      scheduledDate: "2025-02-10",
-      notes: "Completed successfully"
-    },
-    {
-      _id: "4",
-      orderId: "SR-004",
-      customer: { 
-        name: "Sarah Williams",
-        email: "sarah.w@example.com",
-        phone: "+91 9876543213",
-        address: "321 Garden Street, Pune, 411001"
-      },
-      service: { 
-        type: "Service", 
-        name: "RO Repair",
-        description: "Emergency repair needed"
-      },
-      createdAt: "2025-01-28",
-      status: "cancelled",
-      assignedTo: "Not Assigned",
-      priority: "High",
-      scheduledDate: "2025-02-20",
-      notes: "Customer cancelled due to relocation"
-    },
-    {
-      _id: "5",
-      orderId: "SR-005",
-      customer: { 
-        name: "Robert Williams",
-        email: "robert.w@example.com",
-        phone: "+91 9876543214",
-        address: "555 Mountain View, Hyderabad, 500001"
-      },
-      service: { 
-        type: "AMC", 
-        name: "3 Months Plan",
-        description: "Annual maintenance contract for 3 months"
-      },
-      createdAt: "2025-01-28",
-      status: "new",
-      assignedTo: "Suresh Reddy",
-      priority: "Normal",
-      scheduledDate: "2025-03-01",
-      notes: "AMC plan starting from March"
-    },
-  ];
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
 
-  // --- Filtering Logic ---
-  const filteredRequests = dummyRequests.filter((item) => {
-    const matchesStatus =
-      statusFilter === "All" || item.status.toLowerCase() === statusFilter.toLowerCase();
-    const matchesSearch =
-      search === "" ||
-      item.customer?.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.orderId.toLowerCase().includes(search.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Fetch service requests when filters change
+  useEffect(() => {
+    dispatch(getAllServiceRequests({
+      limit: entries,
+      page: currentPage,
+      search: debouncedSearch,
+      status: statusFilter
+    }));
+  }, [dispatch, entries, currentPage, debouncedSearch, statusFilter]);
+
+  // Clear error when component unmounts
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   // --- Pagination Logic ---
-  const total = filteredRequests.length;
-  const totalPages = total > 0 ? Math.ceil(total / entries) : 1;
-  const startIndex = (currentPage - 1) * entries;
-  const endIndex = startIndex + entries;
-  const paginatedRequests = filteredRequests.slice(startIndex, endIndex);
+  const total = totalRequests;
+  const totalPages = apiTotalPages || 1;
 
   // --- Handlers ---
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
+  };
+
+  const handleEntriesChange = (newEntries) => {
+    setEntries(newEntries);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (value) => {
+    setSearch(value);
+    setCurrentPage(1);
+  };
+
+  const handleStatusChange = (value) => {
+    setStatusFilter(value);
+    setCurrentPage(1);
   };
 
   // --- Helpers ---
@@ -178,12 +112,22 @@ const ServiceRequest = () => {
     return new Date(dateString).toLocaleDateString("en-GB");
   };
 
-  const getRequestId = (orderId) => {
-    return orderId ? (orderId.includes("-") ? orderId.split("-")[1] : orderId) : "N/A";
+  const getRequestId = (item) => {
+    // Handle both orderId and requestId fields
+    const id = item.requestId || item.orderId;
+    return id || "N/A";
   };
 
-  const getProductModel = (service) => {
-    return service?.name || "N/A";
+  const getServiceName = (item) => {
+    return item.serviceName || item.service?.name || "N/A";
+  };
+
+  const getServiceType = (item) => {
+    return item.serviceType || item.service?.type || "Service";
+  };
+
+  const getCustomerName = (item) => {
+    return item.customerName || item.customer?.name || "Unknown";
   };
 
   const getVisiblePages = () => {
@@ -195,12 +139,27 @@ const ServiceRequest = () => {
     return pages;
   };
 
+  const calculateStartIndex = () => {
+    return (currentPage - 1) * entries + 1;
+  };
+
+  const calculateEndIndex = () => {
+    return Math.min(currentPage * entries, total);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Header2 />
 
       <div className="p-6 pt-5">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Service Request Management</h1>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
 
         {/* --- Controls: Entries | Search | Status --- */}
         <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
@@ -209,11 +168,9 @@ const ServiceRequest = () => {
             <span className="text-sm font-medium text-gray-600">Show</span>
             <select
               value={entries}
-              onChange={(e) => {
-                setEntries(Number(e.target.value));
-                setCurrentPage(1);
-              }}
+              onChange={(e) => handleEntriesChange(Number(e.target.value))}
               className="p-2 border border-gray-300 bg-white rounded-lg w-[70px] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
+              disabled={loading}
             >
               {[5, 10, 20, 50].map((num) => (
                 <option key={num} value={num}>
@@ -231,11 +188,9 @@ const ServiceRequest = () => {
               type="text"
               placeholder="Search by customer name or request ID..."
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full p-2.5 pl-10 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7EC1B1] focus:border-transparent"
+              disabled={loading}
             />
           </div>
 
@@ -243,11 +198,9 @@ const ServiceRequest = () => {
           <div className="flex items-center gap-2">
             <select
               value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => handleStatusChange(e.target.value)}
               className="p-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#7EC1B1] min-w-[160px]"
+              disabled={loading}
             >
               <option value="All">All Status</option>
               <option value="New">New</option>
@@ -275,17 +228,26 @@ const ServiceRequest = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedRequests.length > 0 ? (
-                  paginatedRequests.map((item, index) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan="8" className="text-center py-12">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#7EC1B1]"></div>
+                        <p className="text-gray-500 text-sm">Loading service requests...</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : serviceRequests && serviceRequests.length > 0 ? (
+                  serviceRequests.map((item, index) => (
                     <tr key={item._id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 text-sm text-gray-700 font-medium">
                         {(currentPage - 1) * entries + index + 1}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 font-medium">{getRequestId(item.orderId)}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{item.customer?.name || "Unknown"}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{item.service?.type || "Service"}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{getProductModel(item.service)}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{formatDate(item.createdAt)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 font-medium">{getRequestId(item)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{getCustomerName(item)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{getServiceType(item)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{getServiceName(item)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{formatDate(item.requestDate || item.createdAt)}</td>
                       <td className="px-6 py-4">
                         <span className={`text-sm font-semibold ${getStatusColor(item.status)}`}>
                           {formatStatusText(item.status)}
@@ -321,18 +283,18 @@ const ServiceRequest = () => {
         </div>
 
         {/* --- Pagination --- */}
-        {total > 0 && (
+        {total > 0 && !loading && (
           <div className="flex items-center justify-between mt-6 bg-white px-6 py-4 rounded-lg shadow-sm border border-gray-200">
             <div className="text-sm text-gray-600">
-              Showing <span className="font-medium text-gray-900">{Math.min((currentPage - 1) * entries + 1, total)}</span> to{" "}
-              <span className="font-medium text-gray-900">{Math.min(currentPage * entries, total)}</span> of{" "}
+              Showing <span className="font-medium text-gray-900">{calculateStartIndex()}</span> to{" "}
+              <span className="font-medium text-gray-900">{calculateEndIndex()}</span> of{" "}
               <span className="font-medium text-gray-900">{total}</span> entries
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
+                disabled={currentPage === 1 || loading}
                 className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-medium text-sm text-gray-700"
               >
                 Previous
@@ -342,6 +304,7 @@ const ServiceRequest = () => {
                 <button
                   key={num}
                   onClick={() => handlePageChange(num)}
+                  disabled={loading}
                   className={`px-4 py-2 border rounded-lg w-[42px] font-medium text-sm transition-colors ${
                     currentPage === num 
                       ? "bg-[#7EC1B1] text-white border-[#7EC1B1]" 
@@ -354,7 +317,7 @@ const ServiceRequest = () => {
 
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages}
+                disabled={currentPage >= totalPages || loading}
                 className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-medium text-sm text-gray-700"
               >
                 Next

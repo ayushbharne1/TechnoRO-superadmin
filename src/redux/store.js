@@ -11,6 +11,7 @@ import leadReducer from "../redux/slices/leadSlice";
 import rolesReducer from "./slices/rolesSlice";
 import orderReducer from "../redux/slices/orderSlice";
 import categoryReducer from "../redux/slices/CategorySlice"; 
+import serviceRequestReducer from '../redux/slices/serviceRequestSlice';
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
     role: rolesReducer,
     order: orderReducer,
     category: categoryReducer, // Add this line
+    serviceRequest: serviceRequestReducer,
   },
   devTools: import.meta.env.MODE !== "production",
 });
