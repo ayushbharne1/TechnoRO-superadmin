@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 
 const Services = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { list: apiRows = [], loading } = useSelector((state) => state.service);
   const { categories = [] } = useSelector((state) => state.category);
@@ -24,32 +25,36 @@ const Services = () => {
   const [statusFilter, setStatusFilter] = useState("");
 
   /* ===================== FETCH API DATA ===================== */
-
   useEffect(() => {
     dispatch(fetchServices());
     dispatch(fetchAllCategories());
   }, [dispatch]);
 
   /* ===================== MAP API DATA TO UI ===================== */
-
   useEffect(() => {
-    if (!apiRows.length) return;
+    if (!apiRows.length || !categories.length) return;
 
-    const uiRows = apiRows.map((row) => ({
-      _id: row._id,
-      category: row.category,
-      serviceAMC: row.name,
-      price: `₹${row.price}.00`,
-      warrenty: row.warranty || "NA",
-      discount: row.discount || "NA",
-    }));
+    const uiRows = apiRows.map((row) => {
+      // Find category name from category ID
+      const categoryObj = categories.find((cat) => cat._id === row.category);
+      const categoryName = categoryObj?.name || "Unknown";
+
+      return {
+        _id: row._id,
+        category: categoryName,
+        categoryId: row.category,
+        serviceAMC: row.name,
+        price: `₹${row.price}`,
+        warrenty: row.warranty || "NA",
+        discount: row.discount ? `${row.discount}%` : "NA",
+        description: row.description,
+        features: row.features,
+        images: row.images,
+      };
+    });
 
     setRows(uiRows);
-  }, [apiRows]);
-
-  const navigate = useNavigate();
-  const navigate2 = useNavigate();
-  const navigate3 = useNavigate();
+  }, [apiRows, categories]);
 
   const handleClick = () => navigate("/services/addservice");
 
@@ -59,16 +64,13 @@ const Services = () => {
   };
 
   const filteredRows = rows
-    .filter((row) => row.category.toLowerCase().includes(search.toLowerCase()))
+    .filter((row) => 
+      row.serviceAMC.toLowerCase().includes(search.toLowerCase()) ||
+      row.category.toLowerCase().includes(search.toLowerCase())
+    )
     .filter((row) => {
       if (!statusFilter) return true;
-      // Allow both 'AMC' and 'AMC Plan' to match the filter
-      const cat = row.category.trim().toLowerCase();
-      const filter = statusFilter.trim().toLowerCase();
-      if (filter === 'amc plan') {
-        return cat === 'amc plan' || cat === 'amc';
-      }
-      return cat === filter;
+      return row.categoryId === statusFilter;
     });
 
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
@@ -93,8 +95,12 @@ const Services = () => {
     });
 
     if (result.isConfirmed) {
-      dispatch(deleteService(id));
-      toast.success("Service deleted successfully");
+      try {
+        await dispatch(deleteService(id)).unwrap();
+        toast.success("Service deleted successfully");
+      } catch (error) {
+        toast.error("Failed to delete service");
+      }
     }
   };
 
@@ -115,7 +121,7 @@ const Services = () => {
               <select
                 value={rowsPerPage}
                 onChange={handleRowsPerPage}
-                className="p-1 md:p-2 border rounded bg-gray-100 w-[60px]"
+                className="p-1 md:p-2 border rounded bg-gray-100 w-15"
               >
                 {[10, 20, 30, 40, 50].map((num) => (
                   <option key={num} value={num}>
@@ -127,7 +133,7 @@ const Services = () => {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap text-sm md:text-base mr-15">
-              <div className="relative w-full max-w-[200px]">
+              <div className="relative w-full max-w-50">
                 <img
                   src={SearchIcon}
                   alt="Search"
@@ -147,52 +153,45 @@ const Services = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="p-1 md:p-2 border rounded w-full md:w-[200px] text-sm md:text-base bg-gray-100"
+                className="p-1 md:p-2 border rounded w-full md:w-50 text-sm md:text-base bg-gray-100"
               >
-                <option value="">Select Category</option>
-                {categories
-                  .filter((cat) => cat)
-                  .map((category) => (
-                    <option key={category._id} value={category.name}>
-                      {category.name}
-                    </option>
-                  ))}
+                <option value="">All Categories</option>
+                {categories.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
-          <button
-            onClick={handleAddCategory}
-            className="w-full sm:w-[200px] h-[40px] bg-[#7EC1B1] text-white rounded-lg font-poppins text-[16px]"
-          >
-            Add Service Category
-          </button>
-          <button
-            onClick={handleClick}
-            className="w-full sm:w-[200px] h-[40px] bg-[#7EC1B1] text-white rounded-lg font-poppins text-[16px]"
-          >
-            Add Services
-          </button>
+          
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={handleAddCategory}
+              className="w-full sm:w-50 h-10 bg-[#7EC1B1] text-white rounded-lg font-poppins text-[16px]"
+            >
+              Add Service Category
+            </button>
+            <button
+              onClick={handleClick}
+              className="w-full sm:w-50 h-10 bg-[#7EC1B1] text-white rounded-lg font-poppins text-[16px]"
+            >
+              Add Services
+            </button>
+          </div>
         </div>
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="table-auto w-full min-w-[600px] border border-gray-400 md:min-w-full">
+          <table className="table-auto w-full min-w-150 border border-gray-400 md:min-w-full">
             <thead className="hidden md:table-header-group">
               <tr className="bg-gray-100 text-center text-sm md:text-lg">
                 <th className="p-2 md:p-3 font-poppins font-medium">Sr. No.</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">
-                  Category
-                </th>
-                <th className="p-2 md:p-3 font-poppins font-medium">
-                  Services
-                </th>
+                <th className="p-2 md:p-3 font-poppins font-medium">Category</th>
+                <th className="p-2 md:p-3 font-poppins font-medium">Services</th>
                 <th className="p-2 md:p-3 font-poppins font-medium">Price</th>
-                <th className="p-2 md:p-3 font-poppins font-medium">
-                  Warrenty
-                </th>
-                <th className="p-2 md:p-3 font-poppins font-medium">
-                  Discount
-                </th>
+                <th className="p-2 md:p-3 font-poppins font-medium">Warranty</th>
+                <th className="p-2 md:p-3 font-poppins font-medium">Discount</th>
                 <th className="p-2 md:p-3 font-poppins font-medium">Action</th>
               </tr>
             </thead>
@@ -204,12 +203,19 @@ const Services = () => {
                   </td>
                 </tr>
               </tbody>
+            ) : paginatedRows.length === 0 ? (
+              <tbody>
+                <tr>
+                  <td colSpan={7} className="text-center p-6 text-gray-500">
+                    No services found
+                  </td>
+                </tr>
+              </tbody>
             ) : (
               <tbody className="text-center text-sm md:text-base">
                 {paginatedRows.map((row, index) => {
-                  // Calculate the correct serial number based on current page
                   const serialNumber = (page - 1) * rowsPerPage + index + 1;
-                  
+
                   return (
                     <tr
                       key={row._id}
@@ -224,12 +230,10 @@ const Services = () => {
                         {row.category}
                       </td>
                       <td
-                        className="p-2 md:p-3 block md:table-cell text-left md:text-center max-w-full sm:truncate md:max-w-[200px]"
+                        className="p-2 md:p-3 block md:table-cell text-left md:text-center max-w-full sm:truncate md:max-w-50"
                         title={row.serviceAMC}
                       >
-                        <span className="md:hidden font-semibold">
-                          Service/AMC:{" "}
-                        </span>
+                        <span className="md:hidden font-semibold">Service: </span>
                         {row.serviceAMC}
                       </td>
                       <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
@@ -237,7 +241,7 @@ const Services = () => {
                         {row.price}
                       </td>
                       <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
-                        <span className="md:hidden font-semibold">Warrenty: </span>
+                        <span className="md:hidden font-semibold">Warranty: </span>
                         {row.warrenty}
                       </td>
                       <td className="p-2 md:p-3 block md:table-cell text-left md:text-center">
@@ -246,21 +250,21 @@ const Services = () => {
                       </td>
                       <td className="p-2 md:p-3 flex gap-2 justify-start md:justify-center flex-wrap">
                         <span className="md:hidden font-semibold">Action: </span>
-                        <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
+                        <div className="h-7.5 w-7.5 md:h-9 md:w-9 flex items-center justify-center rounded">
                           <img
                             src={PreviewIcon}
                             onClick={() =>
-                              navigate2("/services/servicedetails", { state: row })
+                              navigate(`/services/servicedetails/${row._id}`)
                             }
                             alt="preview"
                             className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
                           />
                         </div>
-                        <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
+                        <div className="h-7.5 w-7.5 md:h-9 md:w-9 flex items-center justify-center rounded">
                           <img
                             src={EditIcon}
                             onClick={() =>
-                              navigate3("/services/editservice", { state: row })
+                              navigate(`/services/editservice/${row._id}`)
                             }
                             alt="edit"
                             className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
@@ -268,12 +272,12 @@ const Services = () => {
                         </div>
                         <div
                           onClick={() => handleDelete(row._id)}
-                          className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded"
+                          className="h-7.5 w-7.5 md:h-9 md:w-9 flex items-center justify-center rounded cursor-pointer"
                         >
                           <img
                             src={Deleteicon}
                             alt="delete"
-                            className="w-4 h-4 md:w-5 md:h-5 cursor-pointer"
+                            className="w-4 h-4 md:w-5 md:h-5"
                           />
                         </div>
                       </td>
@@ -307,7 +311,7 @@ const Services = () => {
                 onClick={() => handlePageChange(idx + 1)}
                 className={`p-1 md:p-2 border rounded-lg border-[#7EC1B1] ${
                   page === idx + 1 ? "bg-[#7EC1B1] text-white" : ""
-                } w-[30px] md:w-[36px]`}
+                } w-7.5 md:w-9`}
               >
                 {idx + 1}
               </button>

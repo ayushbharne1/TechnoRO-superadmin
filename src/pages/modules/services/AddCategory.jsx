@@ -133,7 +133,7 @@ const AddCategory = () => {
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="table-auto w-full min-w-[600px] border border-gray-300 md:min-w-full">
+              <table className="table-auto w-full min-w-150 border border-gray-300 md:min-w-full">
                 <thead className="hidden md:table-header-group">
                   <tr className="bg-gray-100 text-center text-sm md:text-base">
                     <th className="p-2 md:p-3 font-poppins font-medium border-b border-gray-300">
@@ -218,7 +218,7 @@ const AddCategory = () => {
                           </>
                         ) : (
                           <>
-                            <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
+                            <div className="h-7.5 w-7.5 md:h-9 md:w-9 flex items-center justify-center rounded">
                               <img
                                 src={EditIcon}
                                 onClick={() => handleEditClick(category)}
@@ -226,7 +226,7 @@ const AddCategory = () => {
                                 className="w-4 h-4 md:w-5 md:h-5 cursor-pointer hover:opacity-70"
                               />
                             </div>
-                            <div className="h-[30px] w-[30px] md:h-[36px] md:w-[36px] flex items-center justify-center rounded">
+                            <div className="h-7.5 w-7.5 md:h-9 md:w-9 flex items-center justify-center rounded">
                               <img
                                 src={Deleteicon}
                                 onClick={() => handleDelete(category._id)}

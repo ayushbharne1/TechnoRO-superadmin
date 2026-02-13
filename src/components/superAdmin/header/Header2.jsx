@@ -17,7 +17,7 @@ const Header2 = ({ title }) => {
     "/order-management/view": "Order Details",
 
     // Services & Products
-    "/services": "Services & AMC Plan",
+    "/services": "Services",
     "/services/addservice": "Add Services",
     "/services/servicedetails": "Service Details",
     "/services/editservice": "Edit Service",

@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { fetchAllCategories } from "../../../redux/slices/CategorySlice";
+import ButtonLoader from "../../../components/loader/ButtonLoader";
 
 const AddService = () => {
   const dispatch = useDispatch();
@@ -19,32 +20,80 @@ const AddService = () => {
   const [warrenty, setWarrenty] = useState("");
   const [discount, setDiscount] = useState("");
   const [description, setDescription] = useState("");
+  const [features, setFeatures] = useState([""]);
   const [images, setImages] = useState([]);
 
-    /* ===================== FETCH ALL CATEGORIES ===================== */
-    useEffect(() => {
-        dispatch(fetchAllCategories());
-    }, [dispatch]);
-    const { categories = [] } = useSelector((state) => state.category);
+  /* ===================== FETCH ALL CATEGORIES ===================== */
+  useEffect(() => {
+    dispatch(fetchAllCategories());
+  }, [dispatch]);
+  
+  const { categories = [] } = useSelector((state) => state.category);
+
+  /* ================= FEATURE HANDLERS ================= */
+  const handleAddFeature = () => {
+    setFeatures([...features, ""]);
+  };
+
+  const handleFeatureChange = (index, value) => {
+    const updatedFeatures = [...features];
+    updatedFeatures[index] = value;
+    setFeatures(updatedFeatures);
+  };
+
+  const handleRemoveFeature = (index) => {
+    if (features.length > 1) {
+      const updatedFeatures = features.filter((_, i) => i !== index);
+      setFeatures(updatedFeatures);
+    }
+  };
+
   /* ================= ADD SERVICE (POST API) ================= */
-
   const handleAdd = async () => {
+    // Validation
+    if (!category) {
+      toast.error("Please select a category");
+      return;
+    }
+    if (!service.trim()) {
+      toast.error("Please enter service name");
+      return;
+    }
+    if (!price || isNaN(price) || Number(price) <= 0) {
+      toast.error("Please enter a valid price");
+      return;
+    }
+
     try {
-      const payload = {
-        category,
-        name: service,
-        price: price.toString(), // ✅ convert to number
-        warranty: warrenty,
-        discount,
-        description,
-      };
+      // Prepare FormData for file upload
+      const formData = new FormData();
+      formData.append("category", category);
+      formData.append("name", service.trim());
+      formData.append("price", price.toString());
+      formData.append("discount", discount || "0");
+      formData.append("description", description.trim());
+      
+      // Handle features - only add non-empty features
+      const validFeatures = features.filter(f => f.trim() !== "");
+      validFeatures.forEach((feature) => {
+        formData.append("features[]", feature.trim());
+      });
 
-      const res = await dispatch(addService(payload)).unwrap();
+      // Add images
+      images.forEach((img) => {
+        formData.append("images", img);
+      });
 
+      await dispatch(addService(formData)).unwrap();
+      
+      toast.success("Service added successfully!");
       navigate("/services");
     } catch (error) {
       console.error("API Error:", error);
-      toast.error(error?.message || "Failed to add service");
+      const errorMessage = error?.message || 
+                          error?.errors?.[0]?.message || 
+                          "Failed to add service";
+      toast.error(errorMessage);
     }
   };
 
@@ -74,7 +123,7 @@ const AddService = () => {
         <div className="grid md:grid-cols-2 gap-6 w-full">
           <div className="flex flex-col gap-2">
             <label className="font-medium text-gray-700 text-[15px]">
-              Category
+              Category <span className="text-red-500">*</span>
             </label>
             <select
               value={category}
@@ -82,9 +131,9 @@ const AddService = () => {
               className="p-3 border border-gray-300 rounded bg-[#F9F9F9] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
             >
               <option value="">Select Category</option>
-              {categories.map((category) => (
-                <option key={category._id} value={category._id}>
-                  {category.name}
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
                 </option>
               ))}
             </select>
@@ -92,7 +141,7 @@ const AddService = () => {
 
           <div className="flex flex-col gap-2">
             <label className="font-medium text-gray-700 text-[15px]">
-              Service Name
+              Service Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -108,10 +157,10 @@ const AddService = () => {
         <div className="grid md:grid-cols-2 gap-6 w-full">
           <div className="flex flex-col gap-2">
             <label className="font-medium text-gray-700 text-[15px]">
-              Price
+              Price <span className="text-red-500">*</span>
             </label>
             <input
-              type="text"
+              type="number"
               placeholder="₹ Enter Price"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
@@ -139,12 +188,73 @@ const AddService = () => {
             Discount (%)
           </label>
           <input
-            type="text"
+            type="number"
             placeholder="Enter Discount"
             value={discount}
             onChange={(e) => setDiscount(e.target.value)}
             className="p-3 border border-gray-300 rounded bg-[#F9F9F9] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
           />
+        </div>
+
+        {/* Features - Multiple Inputs */}
+        <div className="flex flex-col gap-2 w-full">
+          <label className="font-medium text-gray-700 text-[15px]">
+            Features
+          </label>
+          <div className="space-y-3">
+            {features.map((feature, index) => (
+              <div key={index} className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  placeholder={`Feature ${index + 1}`}
+                  value={feature}
+                  onChange={(e) => handleFeatureChange(index, e.target.value)}
+                  className="flex-1 p-3 border border-gray-300 rounded bg-[#F9F9F9] focus:outline-none focus:ring-2 focus:ring-[#7EC1B1]"
+                />
+                {features.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFeature(index)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded transition"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={handleAddFeature}
+              className="text-[#7EC1B1] hover:text-[#68b1a0] font-medium text-sm flex items-center gap-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Add Another Feature
+            </button>
+          </div>
         </div>
 
         {/* Description */}
@@ -222,9 +332,11 @@ const AddService = () => {
       <div className="flex justify-center w-full mb-8">
         <button
           onClick={handleAdd}
-          className="bg-[#7EC1B1] text-white font-semibold px-15 py-2 rounded-md hover:bg-[#68b1a0] transition"
+          disabled={loading}
+          className="bg-[#7EC1B1] text-white font-semibold px-15 py-2 rounded-md hover:bg-[#68b1a0] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
-          Add
+          {loading && <ButtonLoader size="medium" color="white" />}
+          {loading ? "Adding..." : "Add"}
         </button>
       </div>
     </div>

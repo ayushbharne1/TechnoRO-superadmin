@@ -189,10 +189,10 @@ const AdminLayout = () => {
               <Route path="/services/category/add" element={<AddCategory />} />
 
               <Route
-                path="/services/servicedetails"
+                path="/services/servicedetails/:id"
                 element={<ServiceDetails />}
               />
-              <Route path="/services/editservice" element={<EditService />} />
+              <Route path="/services/editservice/:id" element={<EditService />} />
               <Route path="/service-request" element={<ServiceRequest />} />
               <Route path="/service-request/view/:id" element={<ServiceRequestDetail />} />
 
