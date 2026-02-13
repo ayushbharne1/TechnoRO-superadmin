@@ -6,8 +6,7 @@ import Header2 from "../../../components/superAdmin/header/Header2";
 import { 
   MapPin, Phone, Calendar, Info, Wrench, FileText, UserCheck, Loader2, CheckCircle 
 } from "lucide-react";
-
-import LeadTimeline from "./LeadTimeline"; 
+import LeadTimeLine from "./LeadTimeLine";
 
 const ViewLead = () => {
   const { id } = useParams();
@@ -135,8 +134,8 @@ const ViewLead = () => {
                         {assignedVendorId.name} <span className="text-[#7EC1B1] text-sm">(Vendor)</span>
                     </p>
 
-                    {/* ✅ USE THE NEW COMPONENT HERE */}
-                    <LeadTimeline lead={selectedLead} />
+                   
+                    <LeadTimeLine lead={selectedLead} />
                 </div>
             )}
 

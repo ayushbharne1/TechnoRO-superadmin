@@ -1,23 +1,14 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "../../api/axiosConfig"; 
 
-const API_URL = "https://ro-service-engineer-be.onrender.com/api/admin/service";
-
-const authHeaders = () => {
-  const token = localStorage.getItem("adminToken");
-  return {
-    Authorization: `Bearer ${token}`,
-  };
-};
+const API_URL = "/api/admin/newservice";
 
 /* ================== ADD SERVICE (POST) ================== */
 export const addService = createAsyncThunk(
   "service/add",
   async (payload, { rejectWithValue }) => {
     try {
-      const res = await axios.post(API_URL, payload, {
-        headers: authHeaders(),
-      });
+      const res = await axiosInstance.post(`${API_URL}/create`, payload);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -25,14 +16,12 @@ export const addService = createAsyncThunk(
   }
 );
 
-//  FETCH ALL SERVICES (GET) 
+/* ================== FETCH ALL SERVICES (GET) ================== */
 export const fetchServices = createAsyncThunk(
   "service/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get(API_URL, {
-        headers: authHeaders(),
-      });
+      const res = await axiosInstance.get(`${API_URL}/view`);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -45,9 +34,7 @@ export const fetchServiceById = createAsyncThunk(
   "service/fetchById",
   async (id, { rejectWithValue }) => {
     try {
-      const res = await axios.get(`${API_URL}/${id}`, {
-        headers: authHeaders(),
-      });
+      const res = await axiosInstance.get(`${API_URL}/view/${id}`);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -60,9 +47,7 @@ export const updateService = createAsyncThunk(
   "service/update",
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const res = await axios.put(`${API_URL}/${id}`, data, {
-        headers: authHeaders(),
-      });
+      const res = await axiosInstance.put(`${API_URL}/update/${id}`, data);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -75,9 +60,7 @@ export const deleteService = createAsyncThunk(
   "service/delete",
   async (id, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/${id}`, {
-        headers: authHeaders(),
-      });
+      await axiosInstance.delete(`${API_URL}/remove/${id}`);
       return id;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -97,12 +80,16 @@ const serviceSlice = createSlice({
     clearCurrent: (state) => {
       state.current = null;
     },
+    clearError: (state) => {
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
       /* ===== FETCH ALL ===== */
       .addCase(fetchServices.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchServices.fulfilled, (state, action) => {
         state.loading = false;
@@ -116,6 +103,7 @@ const serviceSlice = createSlice({
       /* ===== ADD ===== */
       .addCase(addService.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(addService.fulfilled, (state, action) => {
         state.loading = false;
@@ -129,6 +117,7 @@ const serviceSlice = createSlice({
       /* ===== FETCH BY ID ===== */
       .addCase(fetchServiceById.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchServiceById.fulfilled, (state, action) => {
         state.loading = false;
@@ -142,6 +131,7 @@ const serviceSlice = createSlice({
       /* ===== UPDATE ===== */
       .addCase(updateService.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(updateService.fulfilled, (state, action) => {
         state.loading = false;
@@ -162,6 +152,7 @@ const serviceSlice = createSlice({
       /* ===== DELETE ===== */
       .addCase(deleteService.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(deleteService.fulfilled, (state, action) => {
         state.loading = false;
@@ -174,4 +165,5 @@ const serviceSlice = createSlice({
   },
 });
 
+export const { clearCurrent, clearError } = serviceSlice.actions;
 export default serviceSlice.reducer;
